@@ -122,12 +122,17 @@ def build_without_intro(src):
 
 
 def check(name, text):
-    urls = set(re.findall(r'https?://[^\s"\'<>)]+', text))
-    external = [u for u in urls
-                if not u.startswith(("http://www.w3.org", "https://gsap.com",
-                                     "http://www.apicreative.ch", "https://[Platzhalter]"))]
-    if external:
-        fail(name + " lädt noch extern: " + ", ".join(sorted(external)))
+    """Stellt sicher, dass nichts mehr aus dem Netz nachgeladen wird.
+
+    Geprüft werden nur Stellen, die wirklich einen Abruf auslösen: src, das href
+    von <link>, und url() in CSS. Adressen im Fliesstext oder in Beispielfeldern
+    sind unbedenklich, die Namensräume von SVG ebenso.
+    """
+    loads = (re.findall(r'\bsrc\s*=\s*"(https?://[^"]+)"', text)
+             + re.findall(r'<link[^>]*\bhref\s*=\s*"(https?://[^"]+)"', text)
+             + re.findall(r'url\(\s*["\']?(https?://[^"\')]+)', text))
+    if loads:
+        fail(name + " lädt noch extern: " + ", ".join(sorted(set(loads))))
     print(f"  {name}: {len(text.encode()) // 1024} KB, keine externen Abrufe")
 
 

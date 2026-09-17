@@ -1,2 +1,6 @@
 # Entpackte Stitch-Entwürfe (Quelle ist das ZIP im Repository)
 stitch_apicreative_website_evolution_journey/
+
+# Python
+__pycache__/
+*.pyc
