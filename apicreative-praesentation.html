@@ -1472,10 +1472,14 @@ html.has-intro.intro-reveal .site-header{transform:none}
       if (introCtx) introCtx.revert();
     } catch (e) {}
     root.classList.remove('has-intro', 'intro-reveal');
-    if (introEl && introEl.parentNode) introEl.parentNode.removeChild(introEl);
+    var hadIntro = !!(introEl && introEl.parentNode);
+    if (hadIntro) introEl.parentNode.removeChild(introEl);
     try { if (window.ScrollTrigger) ScrollTrigger.refresh(); } catch (e) {}
     /* Zuverlässig oben landen: Lenis und ScrollTrigger schreiben die Position
        teils erst im nächsten Bild zurück. */
+    /* Nur nach oben springen, wenn wirklich ein Intro entfernt wurde und
+       kein Sprungziel in der Adresse steht. */
+    if (!hadIntro || window.location.hash) return;
     var toTop = function () {
       if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
       window.scrollTo(0, 0);
