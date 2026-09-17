@@ -591,11 +591,64 @@ form .stack{display:flex; flex-direction:column; gap:var(--s-md)}
    (html.motion), damit ohne Skript nichts unsichtbar bleibt.
    ============================================================ */
 html.motion [data-reveal]{
-  opacity:0; transform:translateY(14px);
+  opacity:0;
   transition:opacity .62s cubic-bezier(.22,1,.36,1), transform .62s cubic-bezier(.22,1,.36,1);
   transition-delay:var(--d,0ms);
 }
+html.motion [data-reveal="up"]{transform:translateY(16px)}
+html.motion [data-reveal="down"]{transform:translateY(-16px)}
+html.motion [data-reveal="left"]{transform:translateX(-18px)}
+html.motion [data-reveal="right"]{transform:translateX(18px)}
 html.motion [data-reveal].is-in{opacity:1; transform:none}
+
+/* Überschriften bauen sich zeilenweise aus ihrer Maske auf.
+   Die Unterlänge braucht Luft, sonst schneidet overflow das g und p ab. */
+.ln{display:block; overflow:hidden; padding-bottom:.14em; margin-bottom:-.14em}
+.ln i{display:block; font-style:normal}
+.w{display:inline-block}
+html.motion [data-split="1"] .ln i{
+  transform:translateY(106%);
+  transition:transform .82s cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--d,0ms);
+}
+html.motion [data-split="1"].is-in .ln i{transform:none}
+
+/* Linien ziehen sich von links auf, statt einfach dazuliegen */
+html.motion .line-host{position:relative}
+html.motion .line-host > .ruler{
+  content:""; position:absolute; left:0; right:0; height:1px; background:var(--line);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .95s cubic-bezier(.22,1,.36,1);
+}
+html.motion .ruler.top{top:0}
+html.motion .ruler.bottom{bottom:0}
+html.motion .ruler.is-in{transform:scaleX(1)}
+html.has-rulers .section--tint,
+html.has-rulers .legal,
+html.has-rulers .site-footer{border-block-color:transparent}
+html.has-rulers .footer-grid{border-bottom-color:transparent}
+
+/* Ein einziger Strich wandert durch die Navigation */
+.main-nav{position:relative}
+.nav-ink{
+  position:absolute; bottom:0; left:0; height:1.5px; width:0; background:var(--red);
+  opacity:0; pointer-events:none;
+  transition:transform .34s cubic-bezier(.22,1,.36,1), width .34s cubic-bezier(.22,1,.36,1), opacity .22s ease;
+}
+html.motion .main-nav:hover .nav-ink{opacity:1}
+html.has-navink .main-nav a::after{display:none}
+
+/* Leistungskarten zeigen beim Überfahren einen Pfeil */
+html.motion .svc h3::after{
+  content:"\2192"; margin-left:.35em; color:var(--red); display:inline-block;
+  opacity:0; transform:translateX(-7px);
+  transition:opacity .26s ease, transform .26s cubic-bezier(.22,1,.36,1);
+}
+html.motion .svc:hover h3::after{opacity:1; transform:none}
+
+/* Sprachwechsel blendet über, statt hart zu tauschen */
+html.motion [data-en]{transition:opacity .3s ease}
+html.motion.lang-swap [data-en]{opacity:.12; transition:opacity .14s ease}
 
 /* Fortschritt und Verdichtung der Kopfzeile */
 .progress{
@@ -640,10 +693,7 @@ html.motion .hero-figure{
   transition:clip-path 1.15s cubic-bezier(.22,1,.36,1) .15s;
 }
 html.motion .hero-figure.is-in{clip-path:inset(0 0 0 0 round var(--r-xl))}
-html.motion .hero-figure .hero-img{
-  transform:scale(1.05); transition:transform 1.6s cubic-bezier(.22,1,.36,1) .15s;
-}
-html.motion .hero-figure.is-in .hero-img{transform:none}
+html.motion .hero-figure .hero-img{transform:scale(1.09); will-change:transform}
 
 /* Ziffern des Vorgehens rollen in Position */
 .step-n{display:inline-block; overflow:hidden; vertical-align:bottom}
@@ -1469,9 +1519,19 @@ html.has-intro.intro-reveal .site-header{transform:none}
       $$('.lang button').forEach(function (b) {
         b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang));
       });
+      document.dispatchEvent(new CustomEvent('apic:lang'));
+    }
+
+    function swap(lang) {
+      if (lang === current || !root.classList.contains('motion')) return setLang(lang);
+      root.classList.add('lang-swap');
+      window.setTimeout(function () {
+        setLang(lang);
+        root.classList.remove('lang-swap');
+      }, 150);
     }
     $$('.lang button').forEach(function (b) {
-      b.addEventListener('click', function () { setLang(b.getAttribute('data-lang')); });
+      b.addEventListener('click', function () { swap(b.getAttribute('data-lang')); });
     });
   })();
 
@@ -1577,6 +1637,7 @@ html.has-intro.intro-reveal .site-header{transform:none}
   }
   var ticking = false;
   var progressBar = null;
+  var heroImg = null, heroBox = null;
   var siteHeader = $('#siteHeader');
 
   function onScroll() {
@@ -1584,6 +1645,13 @@ html.has-intro.intro-reveal .site-header{transform:none}
     var p = Math.max(0, Math.min(1, modernProgress()));
     if (progressBar) progressBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
     if (siteHeader) siteHeader.classList.toggle('is-compact', window.scrollY > 40);
+    if (heroImg) {
+      var r = heroBox.getBoundingClientRect();
+      if (r.bottom > -200 && r.top < window.innerHeight + 200) {
+        var d = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+        heroImg.style.transform = 'translate3d(0,' + (d * -30).toFixed(1) + 'px,0) scale(1.09)';
+      }
+    }
     if (!modalShown && pageUnlocked() && p >= 0.6) openModal();
   }
   window.addEventListener('scroll', function () {
@@ -1609,6 +1677,17 @@ html.has-intro.intro-reveal .site-header{transform:none}
      ======================================================== */
   (function initMotion() {
     if (reduceMotion || !('IntersectionObserver' in window)) return;
+
+    /* Jede Bewegung einzeln abschaltbar. Wegnehmen ist einfacher,
+       als das Mass vorher zu erraten. */
+    var MOTION = {
+      headlines:   true,   // Überschriften zeilenweise aus der Maske
+      direction:   true,   // Einblendungen aus der passenden Richtung
+      lines:       true,   // Trennlinien ziehen sich auf
+      navInk:      true,   // wandernder Strich in der Navigation
+      parallax:    true    // ruhige Tiefenbewegung im Hero-Bild
+    };
+
     root.classList.add('motion');
 
     var io = new IntersectionObserver(function (entries) {
@@ -1622,24 +1701,86 @@ html.has-intro.intro-reveal .site-header{transform:none}
       });
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
 
-    /* Einblenden mit Versatz */
-    function reveal(el, delay) {
-      if (!el) return;
-      el.setAttribute('data-reveal', '');
+    /* Einblenden mit Versatz und Richtung */
+    function reveal(el, delay, dir) {
+      if (!el || el.getAttribute('data-split') === '1') return;
+      el.setAttribute('data-reveal', MOTION.direction ? (dir || 'up') : 'up');
       if (delay) el.style.setProperty('--d', delay + 'ms');
       io.observe(el);
     }
     /* Nur beobachten, das Element bringt seine eigene Bewegung mit */
     function mark(el) { if (el) io.observe(el); }
 
-    function stagger(list, step, start) {
+    function stagger(list, step, start, dir) {
       Array.prototype.forEach.call(list, function (el, i) {
-        reveal(el, (start || 0) + i * (step || 0));
+        reveal(el, (start || 0) + i * (step || 0), dir);
       });
     }
 
+    /* ---- Überschriften in Zeilen zerlegen ----
+       Die Zeilenumbrüche hängen von der Fensterbreite ab, also wird
+       gemessen statt geraten: jedes Wort kurz als inline-block setzen,
+       nach offsetTop gruppieren, dann als maskierte Zeilen neu aufbauen. */
+    var HEADS = '#page h1.t-display, #page h2.t-h1, .strip h2';
+
+    function splitLines(el) {
+      var raw = el.getAttribute('data-raw');
+      if (raw === null) { raw = el.textContent.trim(); el.setAttribute('data-raw', raw); }
+
+      el.textContent = '';
+      var probes = [];
+      raw.split(/\s+/).forEach(function (word) {
+        var w = document.createElement('span');
+        w.className = 'w';
+        w.textContent = word;
+        el.appendChild(w);
+        el.appendChild(document.createTextNode(' '));
+        probes.push(w);
+      });
+
+      var lines = [], top = null, cur = null;
+      probes.forEach(function (w) {
+        var t = Math.round(w.offsetTop);
+        if (top === null || Math.abs(t - top) > 3) { top = t; cur = []; lines.push(cur); }
+        cur.push(w.textContent);
+      });
+
+      el.textContent = '';
+      lines.forEach(function (words, i) {
+        var ln = document.createElement('span');
+        ln.className = 'ln';
+        var inner = document.createElement('i');
+        /* Das Leerzeichen am Zeilenende bleibt stehen: sichtbar hat es
+           keine Wirkung, aber Kopieren und Vorlesen bleiben korrekt. */
+        inner.textContent = words.join(' ') + (i < lines.length - 1 ? ' ' : '');
+        inner.style.setProperty('--d', (i * 70) + 'ms');
+        ln.appendChild(inner);
+        el.appendChild(ln);
+      });
+      el.setAttribute('data-split', '1');
+    }
+
+    function splitAll(keepState) {
+      if (!MOTION.headlines) return;
+      $$(HEADS).forEach(function (el) {
+        var wasIn = el.classList.contains('is-in');
+        splitLines(el);
+        if (keepState && wasIn) {
+          /* Im nächsten Bild, damit der Übergang wirklich läuft: nach einem
+             Sprachwechsel bauen sich die Zeilen sichtbar neu auf. */
+          window.requestAnimationFrame(function () { el.classList.add('is-in'); });
+        } else if (!wasIn) {
+          io.observe(el);
+        }
+      });
+    }
+
+    splitAll(false);
+
     /* Hero */
-    stagger($$('.hero > .chip, .hero > h1, .hero > .t-lead, .hero > .cta'), 90);
+    reveal($('.hero > .chip'), 0, 'left');
+    reveal($('.hero > .t-lead'), 180, 'up');
+    reveal($('.hero > .cta'), 270, 'up');
 
     /* Die Blende läuft nach den Headline-Zeilen an, nicht über einen
        Beobachter: Chromium rechnet das eigene clip-path in die
@@ -1647,19 +1788,32 @@ html.has-intro.intro-reveal .site-header{transform:none}
     var figure = $('.hero-figure');
     if (figure) window.setTimeout(function () { figure.classList.add('is-in'); }, 420);
 
-    /* Abschnittsköpfe */
-    $$('#page .sec-head').forEach(function (head) { stagger(head.children, 80); });
+    /* Abschnittsköpfe: Marke von links, Überschrift über die Maske, Vorspann von unten */
+    $$('#page .sec-head').forEach(function (head) {
+      Array.prototype.forEach.call(head.children, function (el, i) {
+        reveal(el, i * 80, el.classList.contains('t-eyebrow') ? 'left' : 'up');
+      });
+    });
 
     /* Karten und Listen */
-    ['#leistungen .grid', '#vorgehen .grid', '#pakete .plans', '#referenzen .grid',
-     '.team', '#website-check .contact-list', '#kontakt .contact-list', '.legal-grid'
-    ].forEach(function (sel) {
-      var box = $(sel);
-      if (box) stagger(box.children, 90);
+    [['#leistungen .grid', 'up'], ['#vorgehen .grid', 'up'], ['#pakete .plans', 'up'],
+     ['#referenzen .grid', 'up'], ['.team', 'right'],
+     ['#website-check .contact-list', 'left'], ['#kontakt .contact-list', 'left']
+    ].forEach(function (pair) {
+      var box = $(pair[0]);
+      if (box) stagger(box.children, 90, 0, pair[1]);
     });
-    [$('#leistungen .note'), $('#pakete .t-sm'), $('.strip'),
-     $('#website-check .form-grid > :last-child'), $('#kontakt .form-grid > :last-child')
-    ].forEach(function (el) { reveal(el, 60); });
+    var legal = $('.legal-grid');
+    if (legal) {
+      reveal(legal.children[0], 0, 'left');
+      reveal(legal.children[1], 90, 'right');
+    }
+    reveal($('#leistungen .note'), 60, 'up');
+    reveal($('#pakete .t-sm'), 60, 'up');
+    reveal($('.strip'), 60, 'up');
+    reveal($('#website-check .form-grid > :last-child'), 60, 'right');
+    reveal($('#kontakt .form-grid > :last-child'), 60, 'right');
+    reveal($('.about-copy'), 0, 'left');
 
     /* Signatur 1: Raster an den Abschnittsgrenzen */
     $$('#page .sec-head').forEach(function (head) {
@@ -1689,6 +1843,68 @@ html.has-intro.intro-reveal .site-header{transform:none}
 
     /* Teamfotos */
     $$('.member-photo').forEach(mark);
+
+    /* Linien ziehen sich auf. Ränder lassen sich nicht skalieren,
+       also übernimmt je ein eingesetztes Element die Linie. */
+    if (MOTION.lines) {
+      root.classList.add('has-rulers');
+      [['.section--tint', 'top bottom'], ['.legal', 'top'],
+       ['.site-footer', 'top'], ['.footer-grid', 'bottom']
+      ].forEach(function (pair) {
+        $$(pair[0]).forEach(function (host) {
+          host.classList.add('line-host');
+          pair[1].split(' ').forEach(function (side) {
+            var r = document.createElement('span');
+            r.className = 'ruler ' + side;
+            r.setAttribute('aria-hidden', 'true');
+            host.insertBefore(r, host.firstChild);
+            mark(r);
+          });
+        });
+      });
+    }
+
+    /* Ein einziger Strich wandert durch die Navigation */
+    if (MOTION.navInk && window.matchMedia('(min-width: 1101px)').matches) {
+      var nav = $('#mainNav');
+      if (nav) {
+        root.classList.add('has-navink');
+        var ink = document.createElement('span');
+        ink.className = 'nav-ink';
+        ink.setAttribute('aria-hidden', 'true');
+        nav.appendChild(ink);
+        $$('a', nav).forEach(function (a) {
+          a.addEventListener('mouseenter', function () {
+            ink.style.width = a.offsetWidth + 'px';
+            ink.style.transform = 'translateX(' + a.offsetLeft + 'px)';
+          });
+        });
+      }
+    }
+
+    /* Ruhige Tiefenbewegung im Hero-Bild */
+    if (MOTION.parallax && window.innerWidth >= 768) {
+      heroImg = $('.hero-figure .hero-img');
+      heroBox = figure;
+    }
+
+    /* Neue Fensterbreite bedeutet neue Zeilenumbrüche */
+    var lastW = window.innerWidth, splitTimer = null;
+    window.addEventListener('resize', function () {
+      if (Math.abs(window.innerWidth - lastW) < 60) return;
+      lastW = window.innerWidth;
+      window.clearTimeout(splitTimer);
+      splitTimer = window.setTimeout(function () { splitAll(true); }, 200);
+    });
+    document.addEventListener('apic:lang', function () {
+      /* Der Umschalter hat textContent ersetzt, der zwischengespeicherte
+         Rohtext gehört damit zur alten Sprache und muss weg. */
+      $$(HEADS).forEach(function (el) {
+        el.removeAttribute('data-raw');
+        el.removeAttribute('data-split');
+      });
+      splitAll(true);
+    });
 
     /* Fortschrittsstreifen in der Kopfzeile */
     if (siteHeader) {
@@ -1754,6 +1970,15 @@ html.has-intro.intro-reveal .site-header{transform:none}
       if (root.classList.contains('has-intro') && !introOff) finishIntro();
       var y = target.getBoundingClientRect().top + window.scrollY - 76;
       if (lenis) lenis.scrollTo(y); else window.scrollTo({ top: y, behavior: 'smooth' });
+
+      /* Am Ziel blitzt das Raster noch einmal auf, damit die Navigation
+         an derselben Bewegungssprache hängt wie der Rest der Seite. */
+      var grid = target.querySelector('.sec-grid');
+      if (grid) window.setTimeout(function () {
+        grid.classList.remove('is-in');
+        void grid.offsetWidth;
+        grid.classList.add('is-in');
+      }, 620);
     });
   });
 

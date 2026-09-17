@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 444 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 696 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 551 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
+| `index.html` | 452 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 704 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 559 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -48,9 +48,32 @@ Drei Bewegungen tragen das:
 - **Blende.** Das Hero-Bild öffnet sich beim Laden aus einem schmalen Band auf
   volle Höhe.
 
+Dazu fünf feinere Bewegungen:
+
+- **Zeilensatz.** Grosse Überschriften steigen zeilenweise aus einer Maske, 70 ms
+  versetzt. Die Umbrüche werden gemessen, nicht geraten, und nach einem
+  Sprachwechsel oder einer Grössenänderung neu gesetzt.
+- **Richtung.** Einblendungen kommen aus der Richtung, in die das Element gehört:
+  Marken von links, Formularkarten von rechts, Karten von unten.
+- **Linien.** Trennlinien zwischen den Abschnitten, im Footer und unter dem
+  Footer-Raster ziehen sich von links auf.
+- **Navigation.** Ein einziger roter Strich wandert zwischen den Menüpunkten.
+  Auf den Leistungskarten schiebt sich beim Überfahren ein Pfeil herein.
+- **Tiefe.** Das Hero-Bild bewegt sich in seinem Rahmen langsamer als die Seite.
+
 Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
 Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
-Graustufe zu Farbe, Knöpfe die sich von links füllen.
+Graustufe zu Farbe, Knöpfe die sich von links füllen, überblendender
+Sprachwechsel und ein Rasterblitz am Sprungziel eines Menüklicks.
+
+Jede der fünf lässt sich einzeln abschalten. Im Skript, am Anfang von
+`initMotion()`:
+
+```js
+var MOTION = {
+  headlines: true, direction: true, lines: true, navInk: true, parallax: true
+};
+```
 
 Alles läuft über `transform`, `opacity` und `clip-path`, also über den
 Compositor. Die Auslöser setzt das Skript, nicht das Markup: `initMotion()`
