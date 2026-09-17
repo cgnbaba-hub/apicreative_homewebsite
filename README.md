@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 436 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 689 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 543 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
+| `index.html` | 444 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 696 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 551 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -32,6 +32,31 @@ oder bei Exit-Intent auf dem Desktop, einmal pro Sitzung.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
+
+## Bewegung
+
+Die moderne Seite hat eine eigene Bewegungsschicht, unabhängig vom Intro. Der
+Gedanke dahinter: Die Seite verhält sich wie ein Präzisionsinstrument. Nichts
+schwebt oder federt, Dinge rasten ein und Masse werden gezogen.
+
+Drei Bewegungen tragen das:
+
+- **Raster.** An jeder Abschnittsgrenze wird das Zwölf-Spalten-Raster kurz als
+  rote Haarlinie sichtbar, während die Inhalte darauf einrasten.
+- **Bemassung.** An Vorgehen und Paketen zeichnet sich eine Masslinie mit
+  Endstrichen über die Karte und bleibt danach als feine Linie stehen.
+- **Blende.** Das Hero-Bild öffnet sich beim Laden aus einem schmalen Band auf
+  volle Höhe.
+
+Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
+Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
+Graustufe zu Farbe, Knöpfe die sich von links füllen.
+
+Alles läuft über `transform`, `opacity` und `clip-path`, also über den
+Compositor. Die Auslöser setzt das Skript, nicht das Markup: `initMotion()`
+vergibt die Attribute und hängt die Beobachter ein. Ohne JavaScript bleibt
+nichts unsichtbar, und bei `prefers-reduced-motion` wird die ganze Schicht
+nicht aktiviert.
 
 ## Was noch offen ist
 

@@ -93,7 +93,7 @@ ul{margin:0; padding:0; list-style:none}
 /* ============================================================
    3. Layout-Primitive
    ============================================================ */
-.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:var(--margin)}
+.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:var(--margin); position:relative}
 .section{padding-block:var(--s-3xl)}
 .section--tint{background:var(--surface-2); border-block:1px solid var(--line)}
 @media (max-width:767px){ .section{padding-block:var(--s-2xl)} }
@@ -123,9 +123,7 @@ ul{margin:0; padding:0; list-style:none}
 }
 .btn:active{transform:scale(.985)}
 .btn--primary{background:var(--red); color:#fff}
-.btn--primary:hover{background:var(--red-dark)}
 .btn--dark{background:var(--ink); color:#fff}
-.btn--dark:hover{background:#000}
 .btn--ghost{background:transparent; border-color:var(--line); color:var(--ink)}
 .btn--ghost:hover{background:var(--surface-2); border-color:var(--ink)}
 .btn--block{width:100%}
@@ -440,6 +438,7 @@ html.has-intro .site-header{transform:translateY(-101%)}
 
 /* Vorgehen */
 .step{position:relative}
+.plan{position:relative}
 .step .step-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--s-lg)}
 .step .step-n{font-family:var(--mono); font-size:1.75rem; font-weight:700}
 .step h3{margin-bottom:.5rem}
@@ -586,6 +585,100 @@ form .stack{display:flex; flex-direction:column; gap:var(--s-md)}
 .modal-card .no-thanks{background:none; border:0; cursor:pointer; color:var(--muted); font-size:.8125rem;
   text-decoration:underline; text-underline-offset:4px; text-decoration-color:var(--line); margin-top:.35rem}
 .modal-card .no-thanks:hover{color:var(--ink)}
+
+/* ============================================================
+   6. Bewegung
+
+   Alles läuft über transform, opacity und clip-path, also über den
+   Compositor. Der Ausgangszustand wird erst von JavaScript gesetzt
+   (html.motion), damit ohne Skript nichts unsichtbar bleibt.
+   ============================================================ */
+html.motion [data-reveal]{
+  opacity:0; transform:translateY(14px);
+  transition:opacity .62s cubic-bezier(.22,1,.36,1), transform .62s cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--d,0ms);
+}
+html.motion [data-reveal].is-in{opacity:1; transform:none}
+
+/* Fortschritt und Verdichtung der Kopfzeile */
+.progress{
+  position:absolute; left:0; right:0; bottom:-1px; height:2px; background:var(--red);
+  transform:scaleX(0); transform-origin:left; will-change:transform;
+}
+.site-header .wrap,
+.site-header .logo{transition:height .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1)}
+.site-header .logo{transform-origin:left center}
+.site-header.is-compact .wrap{height:3.5rem}
+.site-header.is-compact .logo{transform:scale(.93)}
+
+/* Signatur 1: das Raster zeigt sich kurz und die Inhalte rasten ein */
+.sec-grid{
+  position:absolute; inset:0; z-index:0; pointer-events:none; opacity:0;
+  background-image:linear-gradient(to right, rgba(218,41,28,.16) 0 1px, transparent 1px);
+  background-size:calc(100% / 12) 100%;
+}
+html.motion .sec-grid.is-in{animation:gridFlash 1.3s cubic-bezier(.22,1,.36,1) both}
+@keyframes gridFlash{0%{opacity:0} 18%{opacity:1} 100%{opacity:0}}
+
+/* Signatur 2: Bemassung an Vorgehen und Paketen */
+.dim{
+  position:absolute; left:var(--s-xl); right:var(--s-xl); top:-1px; height:1px;
+  background:var(--red); transform:scaleX(0); transform-origin:left; pointer-events:none;
+  transition:opacity .5s ease;
+}
+.dim::before,.dim::after{
+  content:""; position:absolute; top:-3px; width:1px; height:7px; background:var(--red);
+  opacity:0; transition:opacity .3s ease .55s;
+}
+.dim::before{left:0}
+.dim::after{right:0}
+html.motion .dim.is-in{transform:scaleX(1); transition:transform .8s cubic-bezier(.22,1,.36,1)}
+html.motion .dim.is-in::before, html.motion .dim.is-in::after{opacity:1}
+html.motion .dim.is-rest{opacity:.3}
+@media (max-width:767px){ .dim{left:var(--s-lg); right:var(--s-lg)} }
+
+/* Signatur 3: das Hero-Bild öffnet sich wie eine Blende */
+html.motion .hero-figure{
+  clip-path:inset(36% 0 36% 0 round var(--r-xl));
+  transition:clip-path 1.15s cubic-bezier(.22,1,.36,1) .15s;
+}
+html.motion .hero-figure.is-in{clip-path:inset(0 0 0 0 round var(--r-xl))}
+html.motion .hero-figure .hero-img{
+  transform:scale(1.05); transition:transform 1.6s cubic-bezier(.22,1,.36,1) .15s;
+}
+html.motion .hero-figure.is-in .hero-img{transform:none}
+
+/* Ziffern des Vorgehens rollen in Position */
+.step-n{display:inline-block; overflow:hidden; vertical-align:bottom}
+.step-n i{display:block; font-style:normal}
+html.motion .step-n i{transform:translateY(106%); transition:transform .75s cubic-bezier(.22,1,.36,1) .1s}
+html.motion .step-n.is-in i{transform:none}
+
+/* Symbole der Leistungen zeichnen sich selbst */
+html.motion .svc-ico .icon{
+  stroke-dasharray:110; stroke-dashoffset:110;
+  transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1) .2s;
+}
+html.motion .svc.is-in .svc-ico .icon{stroke-dashoffset:0}
+
+/* Teamfotos kommen zu Farbe */
+html.motion .member-photo{filter:grayscale(1); transition:filter 1.2s ease .1s}
+html.motion .member-photo.is-in{filter:grayscale(0)}
+
+/* Knöpfe füllen sich von links */
+.btn{position:relative; overflow:hidden; isolation:isolate}
+.btn > *{position:relative; z-index:1}
+.btn--primary::after,.btn--dark::after{
+  content:""; position:absolute; inset:0; z-index:0; transform:scaleX(0); transform-origin:left;
+  transition:transform .4s cubic-bezier(.22,1,.36,1);
+}
+.btn--primary::after{background:var(--red-dark)}
+.btn--dark::after{background:#000}
+.btn--primary:hover::after,.btn--dark:hover::after{transform:scaleX(1)}
+
+/* Erfolgsmeldung schiebt sich ein */
+.success[data-on="true"]{animation:slideIn .45s cubic-bezier(.22,1,.36,1)}
+@keyframes slideIn{from{opacity:0; transform:translateY(-6px)}}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
@@ -856,17 +949,17 @@ form .stack{display:flex; flex-direction:column; gap:var(--s-md)}
       </div>
       <div class="grid g-3">
         <article class="card step">
-          <div class="step-top"><span class="step-n">01</span><span class="num" aria-hidden="true">·</span></div>
+          <div class="step-top"><span class="step-n">01</span></div>
           <h3 class="t-h4" data-en="Getting to know each other">Kennenlernen</h3>
           <p class="t-body" data-en="We listen, review your current presence and clarify what you want to achieve. Afterwards you know what we propose and why.">Wir hören zu, sichten Ihren aktuellen Auftritt und klären, was Sie erreichen wollen. Danach wissen Sie, was wir vorschlagen und weshalb.</p>
         </article>
         <article class="card step">
-          <div class="step-top"><span class="step-n">02</span><span class="num" aria-hidden="true">·</span></div>
+          <div class="step-top"><span class="step-n">02</span></div>
           <h3 class="t-h4" data-en="Implementation">Umsetzung</h3>
           <p class="t-body" data-en="Design, build and setup of the systems. You see interim results and take part in the decisions.">Gestaltung, Aufbau und Einrichtung der Systeme. Sie sehen Zwischenstände und entscheiden mit.</p>
         </article>
         <article class="card step">
-          <div class="step-top"><span class="step-n">03</span><span class="num" aria-hidden="true">·</span></div>
+          <div class="step-top"><span class="step-n">03</span></div>
           <h3 class="t-h4" data-en="Support &amp; further development">Betreuung &amp; Weiterentwicklung</h3>
           <p class="t-body" data-en="After launch we remain responsible. We maintain, measure and keep developing, in consultation with you.">Nach dem Start bleiben wir zuständig. Wir pflegen, messen und entwickeln weiter, in Absprache mit Ihnen.</p>
         </article>
@@ -1511,13 +1604,20 @@ html.has-intro.intro-reveal .site-header{transform:none}
     return (window.scrollY - top) / span;
   }
   var ticking = false;
+  var progressBar = null;
+  var siteHeader = $('#siteHeader');
+
+  function onScroll() {
+    ticking = false;
+    var p = Math.max(0, Math.min(1, modernProgress()));
+    if (progressBar) progressBar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    if (siteHeader) siteHeader.classList.toggle('is-compact', window.scrollY > 40);
+    if (!modalShown && pageUnlocked() && p >= 0.6) openModal();
+  }
   window.addEventListener('scroll', function () {
-    if (ticking || modalShown) return;
+    if (ticking) return;
     ticking = true;
-    window.requestAnimationFrame(function () {
-      ticking = false;
-      if (pageUnlocked() && modernProgress() >= 0.6) openModal();
-    });
+    window.requestAnimationFrame(onScroll);
   }, { passive: true });
 
   /* Exit-Intent nur auf dem Desktop */
@@ -1529,7 +1629,107 @@ html.has-intro.intro-reveal .site-header{transform:none}
   }
 
   /* ========================================================
-     E. Intro: Scroll-Story
+     E. Bewegung auf der modernen Seite
+
+     Die Auslöser werden hier gesetzt, nicht im Markup. So bleibt das
+     HTML frei von Zustandsattributen und die abgeleiteten Fassungen
+     bleiben deckungsgleich.
+     ======================================================== */
+  (function initMotion() {
+    if (reduceMotion || !('IntersectionObserver' in window)) return;
+    root.classList.add('motion');
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+        if (e.target.classList.contains('dim')) {
+          window.setTimeout(function () { e.target.classList.add('is-rest'); }, 1150);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+
+    /* Einblenden mit Versatz */
+    function reveal(el, delay) {
+      if (!el) return;
+      el.setAttribute('data-reveal', '');
+      if (delay) el.style.setProperty('--d', delay + 'ms');
+      io.observe(el);
+    }
+    /* Nur beobachten, das Element bringt seine eigene Bewegung mit */
+    function mark(el) { if (el) io.observe(el); }
+
+    function stagger(list, step, start) {
+      Array.prototype.forEach.call(list, function (el, i) {
+        reveal(el, (start || 0) + i * (step || 0));
+      });
+    }
+
+    /* Hero */
+    stagger($$('.hero > .chip, .hero > h1, .hero > .t-lead, .hero > .cta'), 90);
+
+    /* Die Blende läuft nach den Headline-Zeilen an, nicht über einen
+       Beobachter: Chromium rechnet das eigene clip-path in die
+       Sichtbarkeitsprüfung ein, das Element meldet sich dadurch nie. */
+    var figure = $('.hero-figure');
+    if (figure) window.setTimeout(function () { figure.classList.add('is-in'); }, 420);
+
+    /* Abschnittsköpfe */
+    $$('#page .sec-head').forEach(function (head) { stagger(head.children, 80); });
+
+    /* Karten und Listen */
+    ['#leistungen .grid', '#vorgehen .grid', '#pakete .plans', '#referenzen .grid',
+     '.team', '#website-check .contact-list', '#kontakt .contact-list', '.legal-grid'
+    ].forEach(function (sel) {
+      var box = $(sel);
+      if (box) stagger(box.children, 90);
+    });
+    [$('#leistungen .note'), $('#pakete .t-sm'), $('.strip'),
+     $('#website-check .form-grid > :last-child'), $('#kontakt .form-grid > :last-child')
+    ].forEach(function (el) { reveal(el, 60); });
+
+    /* Signatur 1: Raster an den Abschnittsgrenzen */
+    $$('#page .sec-head').forEach(function (head) {
+      var wrap = head.closest('.wrap');
+      if (!wrap || wrap.querySelector(':scope > .sec-grid')) return;
+      var grid = document.createElement('span');
+      grid.className = 'sec-grid';
+      grid.setAttribute('aria-hidden', 'true');
+      wrap.insertBefore(grid, wrap.firstChild);
+      mark(grid);
+    });
+
+    /* Signatur 2: Bemassung an Vorgehen und Paketen */
+    $$('#vorgehen .step, #pakete .plan').forEach(function (card) {
+      var dim = document.createElement('span');
+      dim.className = 'dim';
+      dim.setAttribute('aria-hidden', 'true');
+      card.insertBefore(dim, card.firstChild);
+      mark(dim);
+    });
+
+    /* Ziffern des Vorgehens */
+    $$('.step-n').forEach(function (n) {
+      n.innerHTML = '<i>' + n.textContent + '</i>';
+      mark(n);
+    });
+
+    /* Teamfotos */
+    $$('.member-photo').forEach(mark);
+
+    /* Fortschrittsstreifen in der Kopfzeile */
+    if (siteHeader) {
+      progressBar = document.createElement('span');
+      progressBar.className = 'progress';
+      progressBar.setAttribute('aria-hidden', 'true');
+      siteHeader.appendChild(progressBar);
+    }
+    onScroll();
+  })();
+
+  /* ========================================================
+     F. Intro: Scroll-Story
      ======================================================== */
   var introEl  = $('#intro');
   var introOff = false;
