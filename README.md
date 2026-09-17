@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 452 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 704 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 559 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
+| 455 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| 708 KB | ja | nein | Zum Verschicken und Vorführen. |
+| 563 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -25,10 +25,14 @@ Animationsbibliotheken.
 
 ## Aufbau der Seite
 
-Sticky-Header mit DE/EN-Umschalter · Hero · Leistungen · Vorgehen · Pakete ·
-Referenzen · Über uns · Gratis Website-Check · Newsletter · Kontakt ·
-Impressum und Datenschutz · Footer. Dazu ein Newsletter-Pop-up ab 60 % Scrolltiefe
-oder bei Exit-Intent auf dem Desktop, einmal pro Sitzung.
+Sticky-Header mit DE/EN-Umschalter · Hero über die volle Breite · Leistungen ·
+Vorgehen · Pakete · Referenzen · Über uns · Gratis Website-Check · Newsletter ·
+Kontakt · Impressum und Datenschutz · Footer. Dazu ein Newsletter-Pop-up ab 60 %
+Scrolltiefe oder bei Exit-Intent auf dem Desktop, einmal pro Sitzung.
+
+Es gibt bewusst nur **zwei Formulare**: den Website-Check auf der Seite und das
+Newsletter-Pop-up. Der Kontaktbereich führt zum Website-Check, statt ein zweites
+Formular danebenzustellen, und der Newsletter-Streifen öffnet das Pop-up.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
@@ -45,8 +49,8 @@ Drei Bewegungen tragen das:
   rote Haarlinie sichtbar, während die Inhalte darauf einrasten.
 - **Bemassung.** An Vorgehen und Paketen zeichnet sich eine Masslinie mit
   Endstrichen über die Karte und bleibt danach als feine Linie stehen.
-- **Blende.** Das Hero-Bild öffnet sich beim Laden aus einem schmalen Band auf
-  volle Höhe.
+- **Blende.** Der Hero-Hintergrund öffnet sich beim Laden aus einem schmalen Band
+  auf volle Höhe.
 
 Dazu fünf feinere Bewegungen:
 
@@ -59,7 +63,11 @@ Dazu fünf feinere Bewegungen:
   Footer-Raster ziehen sich von links auf.
 - **Navigation.** Ein einziger roter Strich wandert zwischen den Menüpunkten.
   Auf den Leistungskarten schiebt sich beim Überfahren ein Pfeil herein.
-- **Tiefe.** Das Hero-Bild bewegt sich in seinem Rahmen langsamer als die Seite.
+- **Tiefe.** Der Hero-Hintergrund läuft langsamer als die Seite und driftet
+  zusätzlich langsam in sich, auch wenn niemand scrollt.
+- **Schwebende Objekte.** Fenster auf ein Bild mit freigestellten Scheiben und
+  Platten, über `mix-blend-mode: multiply` in den Seitengrund eingelassen und in
+  einer langsamen 3D-Schleife bewegt.
 
 Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
 Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
@@ -71,7 +79,8 @@ Jede der fünf lässt sich einzeln abschalten. Im Skript, am Anfang von
 
 ```js
 var MOTION = {
-  headlines: true, direction: true, lines: true, navInk: true, parallax: true
+  headlines: true, direction: true, lines: true,
+  navInk: true, parallax: true, ambient: true
 };
 ```
 
@@ -80,6 +89,22 @@ Compositor. Die Auslöser setzt das Skript, nicht das Markup: `initMotion()`
 vergibt die Attribute und hängt die Beobachter ein. Ohne JavaScript bleibt
 nichts unsichtbar, und bei `prefers-reduced-motion` wird die ganze Schicht
 nicht aktiviert.
+
+## Lesbarkeit über dem Bild
+
+Text über einem Bild ist die klassische Stolperstelle. Gemessen wurde am
+dunkelsten Punkt des Hintergrunds unter dem jeweiligen Textkasten, bei 1440,
+1920 und 390 Pixel Breite:
+
+| | Headline `#1D1D1F` | Vorspann `#6E6E73` |
+|---|---|---|
+| 1440 | 11,0:1 | 4,9:1 |
+| 1920 | 10,8:1 | 4,9:1 |
+| 390 | 16,1:1 | 4,8:1 |
+
+Die schwebenden Objekte erscheinen erst ab 1400 Pixel Breite und nur dort, wo
+kein Fliesstext darüber liegt. Hinter Text drücken sie den Kontrast unter den
+Grenzwert, auch bei geringer Deckkraft.
 
 ## Was noch offen ist
 
@@ -110,7 +135,9 @@ Das Skript prüft zum Schluss, dass die erzeugten Dateien nichts mehr extern nac
 Lenis 1.1.20 und die Schrift Inter 5.3.0 (Zeichensatz Latein, Schnitte 400 bis 700).
 
 `assets/` enthält die beiden Teamfotos im Original und den daraus erzeugten
-Ausschnitt. `crop_portraits.py` schneidet beide auf dasselbe Hochformat 4:5 zu,
+Ausschnitt sowie die beiden Hintergründe `bg-geometrie.jpg` (Hero, gespiegelt,
+damit der Text links freien Grund hat) und `bg-objekte.jpg` (die schwebenden
+Objekte). `crop_portraits.py` schneidet beide auf dasselbe Hochformat 4:5 zu,
 mit gleicher Kopfgrösse und gleicher Kinnhöhe:
 
 ```
