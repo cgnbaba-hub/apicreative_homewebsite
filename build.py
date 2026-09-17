@@ -133,7 +133,16 @@ def check(name, text):
              + re.findall(r'url\(\s*["\']?(https?://[^"\')]+)', text))
     if loads:
         fail(name + " lädt noch extern: " + ", ".join(sorted(set(loads))))
-    print(f"  {name}: {len(text.encode()) // 1024} KB, keine externen Abrufe")
+
+    # Ein nicht geschlossenes /* verschluckt den Rest des Stylesheets, ohne dass
+    # der Browser meckert. Genau so ist einmal das Pop-up verloren gegangen.
+    for nr, block in enumerate(re.findall(r"<style>(.*?)</style>", text, re.S), 1):
+        if block.count("/*") != block.count("*/"):
+            fail(f"{name}: Style-Block {nr} hat {block.count('/*')} mal /* "
+                 f"aber {block.count('*/')} mal */ - ein Kommentar ist offen")
+
+    print(f"  {name}: {len(text.encode()) // 1024} KB, keine externen Abrufe, "
+          f"CSS-Kommentare geschlossen")
 
 
 def main():
