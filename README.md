@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| 455 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| 708 KB | ja | nein | Zum Verschicken und Vorführen. |
-| 563 KB | nein | nein | Nur die moderne Seite, ohne Animation. |
+| `index.html` | 617 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 870 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 725 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -26,8 +26,8 @@ Animationsbibliotheken.
 ## Aufbau der Seite
 
 Sticky-Header mit DE/EN-Umschalter · Hero über die volle Breite · Leistungen ·
-Vorgehen · Pakete · Referenzen · Über uns · Gratis Website-Check · Newsletter ·
-Kontakt · Impressum und Datenschutz · Footer. Dazu ein Newsletter-Pop-up ab 60 %
+Vorgehen · Pakete · Referenzen · Bildband · Über uns · Gratis Website-Check ·
+Newsletter · Kontakt · Impressum und Datenschutz · Footer. Dazu ein Newsletter-Pop-up ab 60 %
 Scrolltiefe oder bei Exit-Intent auf dem Desktop, einmal pro Sitzung.
 
 Es gibt bewusst nur **zwei Formulare**: den Website-Check auf der Seite und das
@@ -67,7 +67,10 @@ Dazu fünf feinere Bewegungen:
   zusätzlich langsam in sich, auch wenn niemand scrollt.
 - **Schwebende Objekte.** Fenster auf ein Bild mit freigestellten Scheiben und
   Platten, über `mix-blend-mode: multiply` in den Seitengrund eingelassen und in
-  einer langsamen 3D-Schleife bewegt.
+  einer langsamen 3D-Schleife bewegt. Sie liegen entweder im freien Aussenrand
+  oder hinter den Karten, wo nur die Lücken die Bewegung durchlassen.
+- **Bildband.** Die Architekturaufnahme zwischen Referenzen und Über uns läuft
+  beim Scrollen langsamer als die Seite.
 
 Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
 Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
@@ -102,9 +105,13 @@ dunkelsten Punkt des Hintergrunds unter dem jeweiligen Textkasten, bei 1440,
 | 1920 | 10,8:1 | 4,9:1 |
 | 390 | 16,1:1 | 4,8:1 |
 
-Die schwebenden Objekte erscheinen erst ab 1400 Pixel Breite und nur dort, wo
-kein Fliesstext darüber liegt. Hinter Text drücken sie den Kontrast unter den
-Grenzwert, auch bei geringer Deckkraft.
+Die schwebenden Objekte liegen entweder im freien Aussenrand, den es erst ab
+1400 Pixel Breite gibt, oder hinter den Karten. Direkt hinter Fliesstext drücken
+sie den Kontrast unter den Grenzwert, auch bei geringer Deckkraft; dort stehen
+sie deshalb nicht.
+
+Karten tragen `position:relative; z-index:1`. Ohne das liegt die absolut
+gesetzte Objektebene über den unpositionierten Karten und trübt deren Text.
 
 ## Was noch offen ist
 
@@ -136,8 +143,9 @@ Lenis 1.1.20 und die Schrift Inter 5.3.0 (Zeichensatz Latein, Schnitte 400 bis 7
 
 `assets/` enthält die beiden Teamfotos im Original und den daraus erzeugten
 Ausschnitt sowie die beiden Hintergründe `bg-geometrie.jpg` (Hero, gespiegelt,
-damit der Text links freien Grund hat) und `bg-objekte.jpg` (die schwebenden
-Objekte). `crop_portraits.py` schneidet beide auf dasselbe Hochformat 4:5 zu,
+damit der Text links freien Grund hat), `bg-objekte.jpg` (die schwebenden
+Objekte), `bg-netzwerk.jpg` (Abschnittskopf der Leistungen) und
+`bg-architektur.jpg` (das Bildband). `crop_portraits.py` schneidet beide auf dasselbe Hochformat 4:5 zu,
 mit gleicher Kopfgrösse und gleicher Kinnhöhe:
 
 ```
