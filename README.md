@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 633 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 886 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 741 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 634 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 887 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 742 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -125,8 +125,27 @@ var MOTION = {
 Alles läuft über `transform`, `opacity` und `clip-path`, also über den
 Compositor. Die Auslöser setzt das Skript, nicht das Markup: `initMotion()`
 vergibt die Attribute und hängt die Beobachter ein. Ohne JavaScript bleibt
-nichts unsichtbar, und bei `prefers-reduced-motion` wird die ganze Schicht
-nicht aktiviert.
+nichts unsichtbar.
+
+### Bewegung reduzieren
+
+Ist `prefers-reduced-motion` gesetzt (auf dem iPhone: Einstellungen →
+Bedienungshilfen → Bewegung → Bewegung reduzieren), läuft die Seite in einer
+ruhigen Fassung: `html.motion-soft` statt `html.motion`.
+
+Es bleiben Deckkraft-Übergänge beim Einblenden, die Schiene und die
+Hervorhebung ohne Maus. Es entfallen Parallaxe, die Dauerschleifen der
+schwebenden Objekte, das Festhalten des Vorgehens, der Zeilensatz der
+Überschriften, das Raster, die Bemassung und die Blende.
+
+Vorher schaltete die Einstellung die gesamte Schicht ab, und die Seite stand
+auf solchen Geräten völlig still. Die pauschale Regel setzte zudem jede
+Übergangsdauer auf `.001ms`; sie begrenzt jetzt auf `.2s`, damit
+Deckkraft-Übergänge überleben.
+
+`diagnose.html` prüft auf einem Gerät, was zugelassen ist: reduzierte Bewegung,
+Zeigergerät, IntersectionObserver, `position:sticky`, `backdrop-filter`,
+JavaScript-Fehler, dazu drei sichtbare Testfelder.
 
 ## Lesbarkeit über dem Bild
 

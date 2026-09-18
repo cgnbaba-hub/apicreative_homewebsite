@@ -149,7 +149,8 @@ ul{margin:0; padding:0; list-style:none}
    ============================================================ */
 .site-header{
   position:fixed; inset-inline:0; top:0; z-index:90;
-  background:rgba(250,250,250,.8); backdrop-filter:blur(20px) saturate(180%);
+  background:rgba(250,250,250,.8);
+  -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%);
   border-bottom:1px solid var(--line);
   transition:transform .55s cubic-bezier(.22,1,.36,1);
 }
@@ -507,7 +508,8 @@ form .stack{display:flex; flex-direction:column; gap:var(--s-md)}
 /* Modal */
 .modal{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; padding:var(--gutter)}
 .modal[data-open="true"]{display:flex}
-.modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(4px); animation:fade .3s ease}
+.modal-backdrop{position:absolute; inset:0; background:rgba(0,0,0,.4);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); animation:fade .3s ease}
 .modal-card{
   position:relative; width:min(28rem,100%); background:var(--surface); border:1px solid var(--line);
   border-radius:var(--r-xl); padding:var(--s-xl); box-shadow:0 24px 60px -12px rgba(0,0,0,.28);
@@ -658,11 +660,11 @@ html.motion .member-photo.is-in{filter:grayscale(0)}
   position:fixed; left:1.15rem; top:50%; transform:translateY(-50%); z-index:60;
   display:none; flex-direction:column; gap:.85rem;
 }
-@media (min-width:1200px){ html.motion .rail{display:flex} }
+@media (min-width:1200px){ html.motion .rail, html.motion-soft .rail{display:flex} }
 @media (max-width:1199px){
-  html.motion .rail{
+  html.motion .rail, html.motion-soft .rail{
     display:flex; left:auto; right:.55rem; gap:.6rem;
-    background:rgba(250,250,250,.72); backdrop-filter:blur(8px);
+    background:rgba(250,250,250,.72); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
     padding:.5rem .35rem; border-radius:var(--r-full);
   }
   .rail span{display:none}
@@ -699,7 +701,8 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
 /* Vorgehen als gepinnte Abfolge: der Abschnitt bleibt kurz stehen, während
    man durch die drei Schritte wandert. Läuft über position:sticky, damit es
    auch in der Fassung ohne Animationsbibliothek funktioniert. */
-.steps-sticky{position:sticky; top:0; min-height:100vh; display:flex; align-items:center}
+.steps-sticky{position:-webkit-sticky; position:sticky; top:0; display:flex; align-items:center;
+  min-height:100vh; min-height:100svh}
 .steps-scroll{position:relative}
 #vorgehen.is-pinned .step{
   transition:opacity .45s ease, transform .45s cubic-bezier(.22,1,.36,1), box-shadow .45s ease;
@@ -789,9 +792,21 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
 .success[data-on="true"]{animation:slideIn .45s cubic-bezier(.22,1,.36,1)}
 @keyframes slideIn{from{opacity:0; transform:translateY(-6px)}}
 
+/* «Bewegung reduzieren» zielt auf Dauerschleifen, Parallaxe und Skalierung,
+   nicht auf jede Rückmeldung. Schleifen gehen aus, Übergänge werden kurz. */
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.2s !important;
+  }
 }
+
+/* Ruhige Fassung: nur Deckkraft, keine Verschiebung, keine Dauerschleifen */
+html.motion-soft [data-reveal]{
+  opacity:0; transition:opacity .45s ease; transition-delay:var(--d,0ms);
+}
+html.motion-soft [data-reveal].is-in{opacity:1}
 </style>
 </head>
 <body>
@@ -1656,7 +1671,12 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
      bleiben deckungsgleich.
      ======================================================== */
   (function initMotion() {
-    if (reduceMotion || !('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) return;
+
+    /* «Bewegung reduzieren» heisst nicht: gar nichts. In der ruhigen Fassung
+       bleiben Deckkraft-Übergänge, die Schiene und die Hervorhebung ohne
+       Maus; Parallaxe, Dauerschleifen, Festhalten und Zeilensatz fallen weg. */
+    var soft = reduceMotion;
 
     /* Jede Bewegung einzeln abschaltbar. Wegnehmen ist einfacher,
        als das Mass vorher zu erraten. */
@@ -1672,7 +1692,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
       ambient:     true    // schwebende Objekte im Hintergrund
     };
 
-    root.classList.add('motion');
+    root.classList.add(soft ? 'motion-soft' : 'motion');
 
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -1699,7 +1719,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     /* Einblenden mit Versatz und Richtung */
     function reveal(el, delay, dir) {
       if (!el || el.getAttribute('data-split') === '1') return;
-      el.setAttribute('data-reveal', MOTION.direction ? (dir || 'up') : 'up');
+      el.setAttribute('data-reveal', soft ? 'soft' : (MOTION.direction ? (dir || 'up') : 'up'));
       if (delay) el.style.setProperty('--d', delay + 'ms');
       io.observe(el);
     }
@@ -1756,7 +1776,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     }
 
     function splitAll(keepState) {
-      if (!MOTION.headlines) return;
+      if (!MOTION.headlines || soft) return;
       $$(HEADS).forEach(function (el) {
         var wasIn = el.classList.contains('is-in');
         splitLines(el);
@@ -1781,7 +1801,8 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
        Beobachter: Chromium rechnet das eigene clip-path in die
        Sichtbarkeitsprüfung ein, das Element meldet sich dadurch nie. */
     var heroBg = $('.hero-bg');
-    if (heroBg) window.setTimeout(function () { heroBg.classList.add('is-open'); }, 420);
+    if (heroBg && !soft) window.setTimeout(function () { heroBg.classList.add('is-open'); }, 420);
+    if (heroBg && soft) heroBg.classList.add('is-open');
 
     /* Abschnittsköpfe: Marke von links, Überschrift über die Maske, Vorspann von unten */
     $$('#page .sec-head').forEach(function (head) {
@@ -1810,7 +1831,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     reveal($('.about-copy'), 0, 'left');
 
     /* Signatur 1: Raster an den Abschnittsgrenzen */
-    $$('#page .sec-head').forEach(function (head) {
+    if (!soft) $$('#page .sec-head').forEach(function (head) {
       var wrap = head.closest('.wrap');
       if (!wrap || wrap.querySelector(':scope > .sec-grid')) return;
       var grid = document.createElement('span');
@@ -1821,7 +1842,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     });
 
     /* Signatur 2: Bemassung an Vorgehen und Paketen */
-    $$('#pakete .plan').forEach(function (card) {
+    if (!soft) $$('#pakete .plan').forEach(function (card) {
       var dim = document.createElement('span');
       dim.className = 'dim';
       dim.setAttribute('aria-hidden', 'true');
@@ -1830,17 +1851,17 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     });
 
     /* Ziffern des Vorgehens */
-    $$('.step-n').forEach(function (n) {
+    if (!soft) $$('.step-n').forEach(function (n) {
       n.innerHTML = '<i>' + n.textContent + '</i>';
       mark(n);
     });
 
     /* Teamfotos */
-    $$('.member-photo').forEach(mark);
+    if (!soft) $$('.member-photo').forEach(mark);
 
     /* Linien ziehen sich auf. Ränder lassen sich nicht skalieren,
        also übernimmt je ein eingesetztes Element die Linie. */
-    if (MOTION.lines) {
+    if (MOTION.lines && !soft) {
       root.classList.add('has-rulers');
       [['.section--tint', 'top bottom'], ['.legal', 'top'],
        ['.site-footer', 'top'], ['.footer-grid', 'bottom']
@@ -1859,7 +1880,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     }
 
     /* Ein einziger Strich wandert durch die Navigation */
-    if (MOTION.navInk && window.matchMedia('(min-width: 1101px)').matches) {
+    if (MOTION.navInk && !soft && window.matchMedia('(min-width: 1101px)').matches) {
       var nav = $('#mainNav');
       if (nav) {
         root.classList.add('has-navink');
@@ -1877,7 +1898,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     }
 
     /* Der Hero-Hintergrund läuft langsamer als die Seite */
-    if (MOTION.parallax && window.innerWidth >= 768) {
+    if (MOTION.parallax && !soft && window.innerWidth >= 768) {
       heroImg = heroBg;
       heroBox = $('.hero-band');
       bandImg = $('.band-img');
@@ -1885,7 +1906,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
 
     /* Schwebende Objekte. Vier Fenster auf dasselbe Bild, jedes mit eigener
        Grösse, Lage und Umlaufzeit, damit sich nichts sichtbar wiederholt. */
-    if (MOTION.ambient) {
+    if (MOTION.ambient && !soft) {
       var WINDOWS = {
         scheibeGross: { w:470, h:420, bx:-115, by:-5,   dur:58, delay:0  },
         platteOben:   { w:345, h:265, bx:-745, by:0,    dur:47, delay:-9 },
@@ -1998,7 +2019,7 @@ html.has-intro:not(.intro-reveal) .rail{display:none}
     /* Vorgehen kurz festhalten und durch die drei Schritte wandern.
        Braucht Höhe: auf sehr flachen Fenstern bliebe der Inhalt hängen. */
     var vorgehen = $('#vorgehen');
-    if (MOTION.pinnedSteps && vorgehen && window.innerHeight >= 680) {
+    if (MOTION.pinnedSteps && !soft && vorgehen && window.innerHeight >= 680) {
       var innen = $('.wrap', vorgehen);
       var hoch = document.createElement('div');
       hoch.className = 'steps-scroll';
