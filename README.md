@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 627 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 880 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 734 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 633 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 886 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 741 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -86,6 +86,26 @@ Dazu fünf feinere Bewegungen:
   anspringen, Referenzkarten zeigen einen Pfeil, Teamkarten zoomen das Foto und
   ziehen eine Linie unter den Namen, Kontaktzeilen drehen ihr Symbol,
   Footer-Links unterstreichen sich von links.
+- **Gepinntes Vorgehen.** Der Abschnitt bleibt über rund zweieinhalb
+  Bildschirmhöhen stehen, während man durch die drei Schritte wandert. Der
+  aktive Schritt tritt hervor, ein Zähler zeigt `02 / 03`. Umgesetzt über
+  `position:sticky`, damit es auch in der Fassung ohne Animationsbibliothek
+  läuft.
+
+## Ohne Maus
+
+Auf Touchgeräten gibt es kein Überfahren. Dort übernimmt die **Bildmitte** die
+Rolle des Zeigers: Das Element, dessen Mitte dem Fenstermittelpunkt am nächsten
+liegt, bekommt `.is-focus` und damit dieselbe Darstellung wie beim Hover. Das
+gilt für die Leistungszeilen, die Pakete, die Referenzen, die Teamkarten und die
+Kontaktzeilen. Beim Scrollen wandert die Hervorhebung mit.
+
+Die Schiene erscheint auf kleinen Geräten als Punktreihe am rechten Rand, ohne
+Beschriftung. Antippen gibt über `:active` eine kurze Rückmeldung.
+
+Im gepinnten Vorgehen fallen auf schmalen Geräten die inaktiven Schritte auf
+eine Zeile zusammen. Sonst wäre der festgehaltene Inhalt höher als das Fenster
+und der dritte Schritt nie vollständig zu sehen.
 
 Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
 Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
@@ -97,8 +117,8 @@ Jede der fünf lässt sich einzeln abschalten. Im Skript, am Anfang von
 
 ```js
 var MOTION = {
-  headlines: true, direction: true, lines: true, navInk: true,
-  rail: true, parallax: true, ambient: true
+  headlines: true, direction: true, lines: true, navInk: true, rail: true,
+  touchFocus: true, pinnedSteps: true, parallax: true, ambient: true
 };
 ```
 
