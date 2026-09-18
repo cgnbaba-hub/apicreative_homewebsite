@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de-CH">
+<html lang="de-CH" class="nojs">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23FAFAFA'/><rect x='9' y='9' width='14' height='14' rx='2' fill='%23DA291C'/></svg>">
+<script>
+  /* Laeuft ueberhaupt ein Skript? Wenn ja, faellt die CSS-Fassung der
+     Bewegung weg und der Rest der Seite uebernimmt. Wenn nein - manche
+     Dateivorschauen fuehren kein Skript aus - bleibt nojs stehen. */
+  (function () {
+    try {
+      if ('IntersectionObserver' in window) {
+        document.documentElement.classList.remove('nojs');
+      }
+    } catch (e) {}
+  })();
+</script>
 <script>
   /* Vor dem ersten Paint entscheiden, ob das Intro überhaupt läuft. */
   (function () {
@@ -1026,10 +1038,109 @@ html.motion-soft [data-reveal]{
   opacity:0; transition:opacity .45s ease; transition-delay:var(--d,0ms);
 }
 html.motion-soft [data-reveal].is-in{opacity:1}
+
+/* ============================================================
+   7. Fassung ohne Skript
+
+   Eine lokale Datei wird nicht ueberall in einem vollen Browser
+   geoeffnet. Die Dateiverwaltung auf dem Telefon zeigt sie in einer
+   Vorschau, die kein JavaScript ausfuehrt. Dann fehlt die Klasse
+   motion und die Seite stuende vollkommen still.
+
+   Diese Regeln geben ihr dieselbe Bewegung allein aus CSS: Schleifen,
+   die keinen Ausloeser brauchen, ein Auftritt beim Laden, und - wo der
+   Browser es kann - Einblendungen am Scrollstand statt am Beobachter.
+   Sobald ein Skript laeuft, nimmt es die Klasse nojs weg und dieser
+   ganze Abschnitt faellt weg.
+
+   Verschoben wird ueber translate, nicht ueber transform: sonst wuerde
+   der Endzustand der Animation jede spaetere Hover-Regel schlagen.
+   ============================================================ */
+.nojs-bar{display:none}
+
+@media (prefers-reduced-motion: no-preference){
+
+  /* Schleifen, die von selbst laufen */
+  html.nojs .hero-bg::before{animation:heroDrift 46s ease-in-out infinite}
+  html.nojs .svc-figure-img{animation:heroDrift 52s ease-in-out -12s infinite}
+  html.nojs .band-img{animation:heroDrift 68s ease-in-out -24s infinite}
+
+  /* Auftritt beim Laden. Braucht keinen Scrollbezug und laeuft daher
+     auch in aelteren Browsern. */
+  @keyframes nojsEnter{from{opacity:0; translate:0 14px} to{opacity:1; translate:none}}
+  html.nojs .hero .chip,
+  html.nojs .hero h1,
+  html.nojs .hero .t-lead,
+  html.nojs .hero .cta,
+  html.nojs .site-header{animation:nojsEnter .9s cubic-bezier(.22,1,.36,1) both}
+  html.nojs .hero h1{animation-delay:.12s}
+  html.nojs .hero .t-lead{animation-delay:.24s}
+  html.nojs .hero .cta{animation-delay:.36s}
+
+  /* Einblendungen am Scrollstand, sobald der Browser sie beherrscht */
+  @supports (animation-timeline: view()){
+    @keyframes nojsRise{from{opacity:0; translate:0 20px} to{opacity:1; translate:none}}
+
+    html.nojs .sec-head > *,
+    html.nojs .svc-figure,
+    html.nojs .svc-stack > .svc-row,
+    html.nojs .grid > .card,
+    html.nojs .plans > .plan,
+    html.nojs .team > .member,
+    html.nojs .contact-list > .contact-item,
+    html.nojs #kontakt .form-grid > div > .t-eyebrow,
+    html.nojs #kontakt .form-grid > div > h2,
+    html.nojs #kontakt .form-grid > div > .t-lead,
+    html.nojs #website-check,
+    html.nojs .strip,
+    html.nojs .legal .legal-grid > *,
+    html.nojs .footer-grid > *{
+      animation:nojsRise linear both;
+      animation-timeline:view();
+      animation-range:entry 4% entry 44%;
+    }
+
+    /* Versatz, damit eine Reihe nacheinander steht statt gleichzeitig */
+    html.nojs .sec-head > :nth-child(2),
+    html.nojs .svc-stack > :nth-child(2),
+    html.nojs .grid > :nth-child(2),
+    html.nojs .plans > :nth-child(2),
+    html.nojs .team > :nth-child(2),
+    html.nojs .contact-list > :nth-child(2),
+    html.nojs .footer-grid > :nth-child(2){animation-range:entry 9% entry 49%}
+    html.nojs .sec-head > :nth-child(3),
+    html.nojs .svc-stack > :nth-child(3),
+    html.nojs .grid > :nth-child(3),
+    html.nojs .plans > :nth-child(3),
+    html.nojs .contact-list > :nth-child(3),
+    html.nojs .footer-grid > :nth-child(3){animation-range:entry 14% entry 54%}
+    html.nojs .svc-stack > :nth-child(4),
+    html.nojs .contact-list > :nth-child(4),
+    html.nojs .footer-grid > :nth-child(4){animation-range:entry 19% entry 59%}
+    html.nojs .svc-stack > :nth-child(5),
+    html.nojs .contact-list > :nth-child(5){animation-range:entry 24% entry 64%}
+    html.nojs .svc-stack > :nth-child(6){animation-range:entry 29% entry 69%}
+
+    /* Kein Parallaxe-Effekt auf dem Hero-Hintergrund: er liegt in einem
+       Kasten mit overflow:hidden, und view() misst dann gegen diesen
+       Kasten statt gegen die Seite. Der Fortschritt bliebe stehen. */
+
+    /* Ein durchgehender Fortschritt am oberen Rand: das sichtbarste
+       Zeichen dafuer, dass die Seite dem Scrollen folgt. */
+    html.nojs .nojs-bar{
+      display:block; position:fixed; inset:0 0 auto 0; height:2px; z-index:200;
+      background:var(--red); transform-origin:left; pointer-events:none;
+      animation:nojsBar linear both;
+      animation-timeline:scroll(root);
+    }
+    @keyframes nojsBar{from{transform:scaleX(0)} to{transform:scaleX(1)}}
+  }
+}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#page">Zum Inhalt springen</a>
+<div class="nojs-bar" aria-hidden="true"></div>
 
 <!-- Icon-Sprite (Inline-SVG, keine externe Icon-Schrift) -->
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">

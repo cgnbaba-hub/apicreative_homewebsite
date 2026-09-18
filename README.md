@@ -145,7 +145,36 @@ Deckkraft-Übergänge überleben.
 
 `diagnose.html` prüft auf einem Gerät, was zugelassen ist: reduzierte Bewegung,
 Zeigergerät, IntersectionObserver, `position:sticky`, `backdrop-filter`,
-JavaScript-Fehler, dazu drei sichtbare Testfelder.
+JavaScript-Fehler, dazu vier sichtbare Testfelder. Bleibt die Tabelle leer und
+wächst nur Testfeld 4, führt die Umgebung kein JavaScript aus.
+
+### Ohne Skript
+
+Eine lokale Datei wird nicht überall in einem vollen Browser geöffnet. Die
+Dateiverwaltung auf dem Telefon zeigt sie in einer Vorschau, die kein
+JavaScript ausführt. Dann fehlt `html.motion`, und die Seite stünde völlig
+still: alle Inhalte da, nichts in Bewegung.
+
+Dagegen steht Abschnitt 7 des Stylesheets. Am `<html>` hängt von Anfang an die
+Klasse `nojs`; ein sehr frühes Skript nimmt sie wieder weg, sobald überhaupt
+eines läuft. Bleibt sie stehen, übernimmt CSS die Bewegung:
+
+* Dauerschleifen, die keinen Auslöser brauchen (Hero-Hintergrund,
+  Systembild, Bildband).
+* Ein Auftritt beim Laden für Kopfzeile und Hero. Zeitgesteuert, läuft
+  deshalb in jedem Browser.
+* Einblendungen am Scrollstand über `animation-timeline: view()`, mit
+  Versatz je Position in der Reihe, dazu ein Fortschrittsbalken über
+  `scroll(root)`. Hinter `@supports`, denn das können erst neuere Browser
+  (Safari ab 26, Chrome ab 115).
+
+Verschoben wird über `translate` statt `transform`: der Endzustand einer
+Animation mit `fill: both` würde sonst jede spätere Hover-Regel schlagen.
+
+Auf den Hero-Hintergrund wirkt dabei keine Parallaxe. Er liegt in einem Kasten
+mit `overflow:hidden`, und `view()` misst gegen den nächsten Scroll-Container:
+der Fortschritt bliebe stehen und das Bild verschoben. Aus demselben Grund sind
+nur Elemente scrollgesteuert, über denen kein solcher Kasten liegt.
 
 ## Lesbarkeit über dem Bild
 

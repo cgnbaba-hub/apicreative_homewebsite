@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="de-CH">
+<html lang="de-CH" class="nojs">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.remove('nojs')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>apicreative — Diagnose</title>
 <style>
@@ -34,6 +35,16 @@
     padding:.5rem .75rem;border-radius:6px;font-size:.8125rem;width:max-content}
   .spacer{height:70vh}
   code{font-family:ui-monospace,Menlo,monospace;font-size:.8125rem;word-break:break-all}
+  /* Testfeld 4: rein aus CSS, ohne jedes Skript */
+  #t4{width:100%;height:56px;background:var(--red);border-radius:8px;transform:scaleX(.08);transform-origin:left}
+  @supports (animation-timeline: view()){
+    #t4{animation:wachsen linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+    /* Ohne Skript uebernimmt derselbe Mechanismus Testfeld 1 */
+    html.nojs #t1{animation:wachsen linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+  }
+  @keyframes wachsen{from{transform:scaleX(.08)}to{transform:scaleX(1)}}
+  .nur-ohne-js{display:none}
+  html.nojs .nur-ohne-js{display:block}
 </style>
 </head>
 <body>
@@ -42,6 +53,11 @@
 
 <h2>Bewegung</h2>
 <table id="tab"></table>
+<noscript><div class="hinweis"><b>Diese Ansicht führt kein JavaScript aus.</b>
+Die Tabelle darüber bleibt deshalb leer. Genau das ist die Ursache: die Website wird
+hier nur angezeigt, nicht ausgeführt.</div></noscript>
+<div class="hinweis nur-ohne-js"><b>Diese Ansicht führt kein JavaScript aus.</b>
+Die Tabelle darüber bleibt deshalb leer.</div>
 
 <div class="hinweis" id="urteil">wird ermittelt …</div>
 
@@ -56,6 +72,11 @@
 <h2>Testfeld 3 · Festhalten</h2>
 <p class="lead">Die rote Marke sollte beim Scrollen oben kleben bleiben.</p>
 <div class="kleber"><b>ich sollte kleben</b></div>
+
+<h2>Testfeld 4 · Bewegung ganz ohne Skript</h2>
+<p class="lead">Dieser Balken wächst beim Scrollen, auch wenn kein Skript läuft.
+Bewegt er sich, während die drei Felder darüber stillstehen, liegt es am Skript und nicht am Gerät.</p>
+<div class="box"><div id="t4"></div></div>
 
 <div class="spacer"></div>
 <h2>Gerät</h2>
