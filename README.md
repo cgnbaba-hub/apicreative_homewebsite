@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 617 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 870 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 725 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 627 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 880 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 734 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -26,13 +26,18 @@ Animationsbibliotheken.
 ## Aufbau der Seite
 
 Sticky-Header mit DE/EN-Umschalter · Hero über die volle Breite · Leistungen ·
-Vorgehen · Pakete · Referenzen · Bildband · Über uns · Gratis Website-Check ·
-Newsletter · Kontakt · Impressum und Datenschutz · Footer. Dazu ein Newsletter-Pop-up ab 60 %
-Scrolltiefe oder bei Exit-Intent auf dem Desktop, einmal pro Sitzung.
+Vorgehen · Pakete · Referenzen · Bildband · Über uns · Newsletter ·
+Kontakt mit Website-Check · Impressum und Datenschutz · Footer. Dazu ein
+Newsletter-Pop-up ab 60 % Scrolltiefe oder bei Exit-Intent auf dem Desktop,
+einmal pro Sitzung.
 
-Es gibt bewusst nur **zwei Formulare**: den Website-Check auf der Seite und das
-Newsletter-Pop-up. Der Kontaktbereich führt zum Website-Check, statt ein zweites
-Formular danebenzustellen, und der Newsletter-Streifen öffnet das Pop-up.
+Kontakt und Website-Check sind **ein** Abschnitt am Seitenende: Kontaktdaten
+links, Formular rechts. Vorher standen sie getrennt, und der Knopf im
+Kontaktbereich schickte den Besucher wieder nach oben.
+
+Es gibt bewusst nur **zwei Formulare**: den Website-Check und das
+Newsletter-Pop-up. Der Newsletter-Streifen öffnet das Pop-up, statt ein
+eigenes Feld danebenzustellen.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
@@ -71,6 +76,16 @@ Dazu fünf feinere Bewegungen:
   oder hinter den Karten, wo nur die Lücken die Bewegung durchlassen.
 - **Bildband.** Die Architekturaufnahme zwischen Referenzen und Über uns läuft
   beim Scrollen langsamer als die Seite.
+- **Leistungen als Block.** Die sechs Leistungen stehen in einem Block mit
+  Haarlinien. Beim Überfahren löst sich die Zeile heraus: Sie tritt nach links
+  aus dem Rahmen, bekommt Schatten und eine rote Kante, die übrigen treten zurück.
+- **Bleibende Zustände.** Eine Schiene am linken Rand markiert den aktuellen
+  Abschnitt und lässt die bereits gelesenen markiert. Im Vorgehen wird eine Linie
+  über die drei Schritte gezogen, die gezogen bleibt, auch beim Zurückscrollen.
+- **Hover überall.** Pakete heben sich und lassen die Häkchen nacheinander
+  anspringen, Referenzkarten zeigen einen Pfeil, Teamkarten zoomen das Foto und
+  ziehen eine Linie unter den Namen, Kontaktzeilen drehen ihr Symbol,
+  Footer-Links unterstreichen sich von links.
 
 Dazu die Trägerschicht: versetzte Einblendungen, Fortschrittsstreifen unter der
 Kopfzeile, sich verdichtende Kopfzeile, einrollende Ziffern, Teamfotos von
@@ -82,8 +97,8 @@ Jede der fünf lässt sich einzeln abschalten. Im Skript, am Anfang von
 
 ```js
 var MOTION = {
-  headlines: true, direction: true, lines: true,
-  navInk: true, parallax: true, ambient: true
+  headlines: true, direction: true, lines: true, navInk: true,
+  rail: true, parallax: true, ambient: true
 };
 ```
 
@@ -112,6 +127,16 @@ sie deshalb nicht.
 
 Karten tragen `position:relative; z-index:1`. Ohne das liegt die absolut
 gesetzte Objektebene über den unpositionierten Karten und trübt deren Text.
+
+## Einblendung und Hover
+
+`html.motion [data-reveal].is-in` setzt `transform:none` und `opacity:1` und ist
+mit (0,3,1) spezifischer als eine gewöhnliche Hover-Regel. Solange das Attribut
+am Element hängt, bleibt jeder Hover mit `transform` wirkungslos — der
+Karten-Hover war dadurch eine Zeit lang still ausser Kraft.
+
+Deshalb räumt der Beobachter `data-reveal` und `--d` ab, sobald die Einblendung
+durch ist. Danach greifen Hover-Regeln wieder auf ihrer natürlichen Stufe.
 
 ## Was noch offen ist
 
