@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 1022 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 1275 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 1107 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 811 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 1064 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 896 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -44,37 +44,67 @@ oder im Skript `SHOW_REFERENCES = false` setzen.
 
 ## Zeichen
 
-Das Zeichen ist ein **A aus zwei Ebenen**: ein Chevron und eine zweite Fläche,
-die nach rechts unten darunter wegläuft. Es steht als `<symbol id="i-mark">` im
-Inline-Sprite und wird im Kopf, im Footer und im Browser-Tab von derselben
-Stelle geholt.
+Das Zeichen ist ein **A aus zwei Flächen**: ein Chevron und eine kleinere
+Fläche darin. Es wird nicht gezeichnet, sondern **gerechnet** — `make_icons.py`
+konstruiert es aus drei Zahlen:
+
+| | |
+|---|---|
+| `RAND` | Abstand zu allen vier Kanten der Zeichenfläche |
+| `BAND` | Breite des Chevrons, senkrecht gemessen |
+| `SPITZE_INNEN` | y der Spitze der inneren Fläche |
+
+Daraus folgt, was man von Hand nur mühsam trifft: Spiegelsymmetrie zur
+Mittelachse, nur zwei Kantenwinkel im ganzen Zeichen, ein überall gleich
+breites Band, eine überall gleich breite Spalte zwischen Chevron und innerer
+Fläche, und gleicher Abstand zu allen vier Rändern.
+
+Die erste Fassung war von Hand gesetzt. Sie sah verschoben aus, und zu Recht:
+die Spalte war keil- statt parallelförmig, das Band an der Spitze schmaler
+als am Fuss, und das Ganze sass rechts aus der Mitte. Nichts davon kann jetzt
+noch passieren, weil nichts mehr von Hand gesetzt wird.
 
 Gezeichnet ist es als **SVG**, nicht als Pixelbild: scharf in jeder Grösse,
 wenige hundert Byte, und die Farbe steckt in einem Verlauf (`--red` nach
 `--red-warm`), nicht im Bild. Die Akzentfarbe der Seite bleibt `--red`; das
 warme Orange kommt ausschliesslich im Zeichen vor.
 
-Im Browser-Tab liegt dasselbe SVG als Data-URI. Daneben zwei PNG für die
-Stellen, die kein SVG annehmen: 180×180 für den Homescreen von iOS, 512×512
-für alles übrige. Beim Homescreen-Symbol fehlt der äussere Radius mit Absicht —
-iOS legt seine eigene Maske darüber.
-
-Die Form steht an genau **einer** Stelle, im `<symbol id="i-mark">`. Favicon
-und PNG werden daraus abgeleitet:
+Aus derselben Quelle schreibt `make_icons.py` vier Dinge in `index.html`:
+das `<symbol id="i-mark">` im Sprite (Kopf und Footer), den Favicon-Data-URI,
+das 180×180-PNG für den Homescreen von iOS und das 512×512-PNG für alles
+übrige. Der Tab kann damit nie ein anderes Zeichen zeigen als die Seite.
 
 ```
-python3 make_icons.py     # liest das Symbol, schreibt Favicon und PNG zurück
+python3 make_icons.py     # konstruiert das Zeichen, schreibt alle vier Fassungen
 python3 build.py          # erzeugt die beiden abgeleiteten Dateien
 ```
-
-`make_icons.py` kann nur gerade, absolute Strecken (`M`, `L`, `Z`) und bricht
-ab, wenn im Zeichen Kurven auftauchen. Das ist Absicht: es soll lieber
-verweigern als etwas anderes zeichnen als die Seite.
 
 **Herkunft:** Die Form geht auf einen Entwurf zurück, den der Auftraggeber
 beigestellt hat. Die Vorlage trug ein Wasserzeichen. Ob die Lizenz die
 kommerzielle Nutzung deckt, ist vor der Veröffentlichung zu klären; die hier
-gezeichnete SVG-Fassung ist eine Neuzeichnung, keine Kopie der Datei.
+konstruierte Fassung ist eine Neuzeichnung, keine Kopie der Datei.
+
+## Bildband
+
+Das Band zwischen Referenzen und «Über uns» war ein Foto: ein Lichthof mit
+einer Person an der Brüstung. Die Vorlage hatte 1376 Pixel Breite und wurde
+über die volle Fensterbreite gezeigt — auf einem feinen Bildschirm sah man das.
+
+Jetzt steht dort eine **Zeichnung derselben Szene als SVG**: 67 Flächen, rund
+6 KB, scharf in jeder Grösse. `make_band.py` erzeugt sie und schreibt sie in
+`index.html`.
+
+Aufbau in Ebenen, von hinten nach vorn, mit einem Fluchtpunkt, zwei
+Kantenwinkeln und einer Tonleiter aus sieben Werten. Die Person steht für den
+Massstab — ohne sie verliert der Raum seine Grösse.
+
+```
+python3 make_band.py
+python3 build.py
+```
+
+Das Foto `assets/bg-architektur.jpg` ist damit entfallen. Das spart rund
+200 KB in jeder der drei Dateien.
 
 ## Beitrag
 
@@ -320,10 +350,10 @@ Erfolgsmeldung, versenden aber nichts.
 
 Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
 
-- **Hero- und Bandbild** sind zu klein. Beide Stitch-Vorlagen sind nativ
-  1376×768; für die Anzeigegrössen bräuchte es das Zwei- bis Dreifache. Die
-  Technik dafür steht (`<picture>` mit zwei Grössen, `width`, `height`,
-  `loading`), es fehlen die Bilder. Siehe **Bilder**.
+- **Das Herobild** ist zu klein. Die Stitch-Vorlage ist nativ 1376×768; für
+  die Anzeigegrösse bräuchte es das Zwei- bis Dreifache. Die Technik dafür
+  steht (`<picture>` mit zwei Grössen, `width`, `height`, `loading`), es fehlt
+  das Bild. Siehe **Bilder**.
 - **Freigestelltes Teamfoto**: die Stelle in «Über uns» ist vorbereitet, aber
   inaktiv. Im Markup steht `[Platzhalter: freigestelltes Teamfoto]`.
 - **Unterstützte Organisationen** im Abschnitt «Beitrag» sind noch offen;
@@ -348,14 +378,15 @@ Gemessen im Browser, Anzeige in CSS-Pixeln:
 | Bild | nativ | angezeigt | nötig bei 2× | Urteil |
 |---|---|---|---|---|
 | `bg-geometrie` Hero | 1376×768 | bis 2054×865 | bis 4108 | **zu klein** |
-| `bg-architektur` Band | 1376×768 | bis 1920×320 | bis 3840 | **zu klein** |
+| Bildband | — | bis 1920×320 | — | als SVG gezeichnet, siehe **Bildband** |
 | `bg-netzwerk` Leistungen | 1376×768 | 403×224 | 806 | reicht |
 | `bg-objekte` Körper | 1376×768 | 471×421 | 942 | reicht |
 | `team-1`, `team-2` | 600×750 | 348×435 mobil | 1044 bei 3× | knapp |
 
 Alle Stitch-Vorlagen sind nativ 1376×768 — das ist die Decke, nicht der Export.
-Für Hero und Band braucht es Ersatzbilder. Hochskalieren wurde verworfen:
-Faktor 2,8 auf einer ohnehin weichen Vorlage wird nicht scharf, sondern glatt.
+Für den Hero braucht es ein Ersatzbild. Hochskalieren wurde verworfen: Faktor
+2,8 auf einer ohnehin weichen Vorlage wird nicht scharf, sondern glatt. Beim
+Bildband war der dritte Weg der bessere: nicht ersetzen, sondern zeichnen.
 
 Die Porträts stammen aus Aufnahmen mit 704×1527 und 896×1195; der gemeinsame
 Ausschnitt gibt 682×853 beziehungsweise 606×757 her. Mehr als 600×750 ist daraus
@@ -377,11 +408,13 @@ Das Skript prüft zum Schluss, dass die erzeugten Dateien nichts mehr extern nac
 Lenis 1.1.20 und die Schrift Inter 5.3.0 (Zeichensatz Latein, Schnitte 400 bis 700).
 
 `assets/` enthält die beiden Teamfotos im Original und den daraus erzeugten
-Ausschnitt sowie die beiden Hintergründe `bg-geometrie.jpg` (Hero, gespiegelt,
-damit der Text links freien Grund hat), `bg-objekte.jpg` (die schwebenden
-Objekte), `bg-netzwerk.jpg` (Abschnittskopf der Leistungen) und
-`bg-architektur.jpg` (das Bildband). `crop_portraits.py` schneidet beide auf dasselbe Hochformat 4:5 zu,
-mit gleicher Kopfgrösse und gleicher Kinnhöhe:
+Ausschnitt sowie drei Hintergründe: `bg-geometrie.jpg` (Hero, gespiegelt, damit
+der Text links freien Grund hat), `bg-objekte.jpg` (die schwebenden Objekte)
+und `bg-netzwerk.jpg` (Abschnittskopf der Leistungen). Das Bildband ist kein
+Foto mehr, sondern gezeichnet — siehe **Bildband**.
+
+`crop_portraits.py` schneidet die beiden Porträts auf dasselbe Hochformat 4:5
+zu, mit gleicher Kopfgrösse und gleicher Kinnhöhe:
 
 ```
 python3 crop_portraits.py
