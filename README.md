@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 634 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 887 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 742 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 995 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 1248 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 1080 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -41,6 +41,65 @@ eigenes Feld danebenzustellen.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
+
+## Detailansichten der Leistungen
+
+Jede der sechs Leistungszeilen führt auf eine eigene Ansicht unter
+`#leistung/<slug>`: `website-marke`, `wartung-hosting`, `kundenmanagement`,
+`anfragen-leads`, `kundenportal`, `kommunikation`.
+
+Sichtbar macht sie **`:target`**, also der Browser selbst. Daraus folgt einiges
+umsonst: eigene Adresse, Zurück und Vorwärts, Deep-Link — und alles davon auch
+dann, wenn kein Skript läuft. Der Schrägstrich in der Kennung ist Absicht; er
+trifft keine normale Element-Kennung, der Browser springt also nicht daneben.
+Im CSS steht deshalb `.svc-detail:target`, nie die Kennung selbst.
+
+Das Skript ergänzt nur, was CSS nicht kann: die Seite darunter stillhalten
+(`body.detail-offen`), die Scrollposition bewahren, den Fokus in die Ansicht
+setzen und dort halten, Escape.
+
+Die Scrollposition liegt im Verlaufseintrag (`history.replaceState`), nicht in
+einer Variablen. Nur so findet sie auch nach Zurück und Vorwärts an dieselbe
+Stelle zurück.
+
+Die ganze Zeile ist ein `<a>`, nicht nur der Pfeil. Damit sind Hover, Fokus und
+Tastaturbedienung ohne Zutun richtig.
+
+Jede Ansicht ist ein abgeschlossenes `<article>`. Für echte Unterseiten wird es
+später unverändert in eine eigene Datei gehoben; die Slugs sind schon die
+Adressen.
+
+## Sprachen
+
+Deutsch und Englisch sind gleichrangig. Englisch ist keine Übersetzung, sondern
+eigener Text in britischer Schreibung; `lang` steht entsprechend auf `en-GB`
+oder `de-CH`.
+
+Die Startsprache kommt aus `navigator.language` (`de*` → Deutsch, sonst
+Englisch). Die Wahl liegt im `sessionStorage` und bleibt für die Sitzung.
+Umgeschaltet wird ohne Neuladen.
+
+Im Markup steht Deutsch, das Englische hängt daran:
+
+| Attribut | wofür |
+|---|---|
+| `data-en` | sichtbarer Text |
+| `data-en-placeholder` | Platzhalter in Formularfeldern |
+| `data-en-alt` | Bildbeschreibungen |
+| `data-en-aria` | Vorlesetexte |
+
+Was das Skript selbst ausgibt — Fehlermeldungen, die Beschriftung der Schiene —
+steht im Objekt `TEXTE` und wird über `T('schluessel')` geholt. Im Code steht
+keine sichtbare Zeichenkette mehr.
+
+**Die Scrollposition** bleibt beim Umschalten erhalten, aber nicht als Zahl:
+Englisch braucht für denselben Inhalt andere Zeilenzahlen, die Seite über dem
+Sichtfenster wird also länger oder kürzer. Gemerkt wird deshalb, welcher
+Abschnitt gerade oben steht; nach dem Tausch wird er wieder an dieselbe Stelle
+gesetzt. `scrollY` ändert sich dabei um ein paar Pixel, der Blick nicht.
+
+Das **Intro bleibt deutsch**. Es ist ein Zeitstück, eine deutsche Website von
+1999; eine englische Fassung wäre eigene Textarbeit, kein Übersetzen.
 
 ## Bewegung
 
@@ -213,12 +272,44 @@ Erfolgsmeldung, versenden aber nichts.
 
 Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
 
-- **Telefonnummer** `+41 44 123 45 67` ist ein Beispiel und gehört niemandem zu.
+- **Hero- und Bandbild** sind zu klein. Beide Stitch-Vorlagen sind nativ
+  1376×768; für die Anzeigegrössen bräuchte es das Zwei- bis Dreifache. Die
+  Technik dafür steht (`<picture>` mit zwei Grössen, `width`, `height`,
+  `loading`), es fehlen die Bilder. Siehe **Bilder**.
+- **Freigestelltes Teamfoto**: die Stelle in «Über uns» ist vorbereitet, aber
+  inaktiv. Im Markup steht `[Platzhalter: freigestelltes Teamfoto]`.
 - **Referenzen** sind Beispielinhalte. Die Firmennamen beginnen mit «Muster», die
   Sektion weist im Vorspann darauf hin.
 - **Impressum und Datenschutz** sind Entwürfe. Handelsregistereintrag, UID-Nummer
   und vertretungsberechtigte Personen fehlen; beide Texte gehören juristisch geprüft.
   Ein Hinweis darauf steht sichtbar über den beiden Spalten.
+
+## Bilder
+
+Alle inhaltlichen Bilder hängen an `<picture>` mit zwei Grössen, gesetzter
+`width` und `height` und `loading="lazy"` ausserhalb des ersten Bildschirms.
+Das Hero-Bild lädt mit `fetchpriority="high"` und ohne `lazy`. Nur die
+schwebenden Körper im Hintergrund bleiben eine CSS-Fläche: das Skript schneidet
+sie in vier Fenster, dafür braucht es ein Hintergrundbild.
+
+Gemessen im Browser, Anzeige in CSS-Pixeln:
+
+| Bild | nativ | angezeigt | nötig bei 2× | Urteil |
+|---|---|---|---|---|
+| `bg-geometrie` Hero | 1376×768 | bis 2054×865 | bis 4108 | **zu klein** |
+| `bg-architektur` Band | 1376×768 | bis 1920×320 | bis 3840 | **zu klein** |
+| `bg-netzwerk` Leistungen | 1376×768 | 403×224 | 806 | reicht |
+| `bg-objekte` Körper | 1376×768 | 471×421 | 942 | reicht |
+| `team-1`, `team-2` | 600×750 | 348×435 mobil | 1044 bei 3× | knapp |
+
+Alle Stitch-Vorlagen sind nativ 1376×768 — das ist die Decke, nicht der Export.
+Für Hero und Band braucht es Ersatzbilder. Hochskalieren wurde verworfen:
+Faktor 2,8 auf einer ohnehin weichen Vorlage wird nicht scharf, sondern glatt.
+
+Die Porträts stammen aus Aufnahmen mit 704×1527 und 896×1195; der gemeinsame
+Ausschnitt gibt 682×853 beziehungsweise 606×757 her. Mehr als 600×750 ist daraus
+nicht zu holen, ohne hochzuskalieren. Auf dem Telefon bei dreifacher Pixeldichte
+bleibt das knapp. Besser wird es nur mit neuen Aufnahmen.
 
 ## Ändern und neu erzeugen
 

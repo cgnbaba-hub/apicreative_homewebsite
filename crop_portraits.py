@@ -33,7 +33,7 @@ SOURCES = [
 RATIO = 4 / 5        # Breite zu Höhe
 ABOVE = 0.55         # Luft über dem Haaransatz, in Gesichtshöhen
 TOTAL = 2.45         # Gesamthöhe des Ausschnitts, in Gesichtshöhen
-OUT_SIZE = (560, 700)
+OUT_SIZE = (600, 750)   # so gross, wie die Originale es hergeben - mehr steckt nicht drin
 
 
 def measure(arr):
