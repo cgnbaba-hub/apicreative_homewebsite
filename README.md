@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 995 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 1248 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 1080 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 1022 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 1275 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 1107 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -26,7 +26,7 @@ Animationsbibliotheken.
 ## Aufbau der Seite
 
 Sticky-Header mit DE/EN-Umschalter · Hero über die volle Breite · Leistungen ·
-Vorgehen · Pakete · Referenzen · Bildband · Über uns · Newsletter ·
+Vorgehen · Pakete · Referenzen · Bildband · Über uns · Beitrag · Newsletter ·
 Kontakt mit Website-Check · Impressum und Datenschutz · Footer. Dazu ein
 Newsletter-Pop-up ab 60 % Scrolltiefe oder bei Exit-Intent auf dem Desktop,
 einmal pro Sitzung.
@@ -41,6 +41,54 @@ eigenes Feld danebenzustellen.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
+
+## Zeichen
+
+Das Zeichen ist ein **A aus zwei Ebenen**: ein Chevron und eine zweite Fläche,
+die nach rechts unten darunter wegläuft. Es steht als `<symbol id="i-mark">` im
+Inline-Sprite und wird im Kopf, im Footer und im Browser-Tab von derselben
+Stelle geholt.
+
+Gezeichnet ist es als **SVG**, nicht als Pixelbild: scharf in jeder Grösse,
+wenige hundert Byte, und die Farbe steckt in einem Verlauf (`--red` nach
+`--red-warm`), nicht im Bild. Die Akzentfarbe der Seite bleibt `--red`; das
+warme Orange kommt ausschliesslich im Zeichen vor.
+
+Im Browser-Tab liegt dasselbe SVG als Data-URI. Daneben zwei PNG für die
+Stellen, die kein SVG annehmen: 180×180 für den Homescreen von iOS, 512×512
+für alles übrige. Beim Homescreen-Symbol fehlt der äussere Radius mit Absicht —
+iOS legt seine eigene Maske darüber.
+
+Die Form steht an genau **einer** Stelle, im `<symbol id="i-mark">`. Favicon
+und PNG werden daraus abgeleitet:
+
+```
+python3 make_icons.py     # liest das Symbol, schreibt Favicon und PNG zurück
+python3 build.py          # erzeugt die beiden abgeleiteten Dateien
+```
+
+`make_icons.py` kann nur gerade, absolute Strecken (`M`, `L`, `Z`) und bricht
+ab, wenn im Zeichen Kurven auftauchen. Das ist Absicht: es soll lieber
+verweigern als etwas anderes zeichnen als die Seite.
+
+**Herkunft:** Die Form geht auf einen Entwurf zurück, den der Auftraggeber
+beigestellt hat. Die Vorlage trug ein Wasserzeichen. Ob die Lizenz die
+kommerzielle Nutzung deckt, ist vor der Veröffentlichung zu klären; die hier
+gezeichnete SVG-Fassung ist eine Neuzeichnung, keine Kopie der Datei.
+
+## Beitrag
+
+Ein eigener Abschnitt zwischen «Über uns» und dem Newsletter-Streifen:
+zehn Prozent des Umsatzes gehen an gute Zwecke.
+
+Links steht das Mass — zehn Felder, eines davon rot — rechts die Aussage. Der
+Gedanke dahinter: eine Behauptung, die man nachzählen kann, wiegt mehr als eine,
+die man glauben muss. Die Felder sind reines CSS und `aria-hidden`; blinde
+Leser bekommen dieselbe Information aus dem Text daneben.
+
+Der Ort ist bewusst gewählt. Die Aussage gehört zum Unternehmen, also hinter
+dessen Vorstellung. Direkt nach den Paketen läse sie sich als Verkaufsargument
+und entwertete sich damit; im Footer wirkte sie wie ein Nachgedanke.
 
 ## Detailansichten der Leistungen
 
@@ -278,6 +326,9 @@ Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
   `loading`), es fehlen die Bilder. Siehe **Bilder**.
 - **Freigestelltes Teamfoto**: die Stelle in «Über uns» ist vorbereitet, aber
   inaktiv. Im Markup steht `[Platzhalter: freigestelltes Teamfoto]`.
+- **Unterstützte Organisationen** im Abschnitt «Beitrag» sind noch offen;
+  `[Platzhalter: unterstützte Organisationen]` steht sichtbar auf der Seite.
+- **Lizenz des Zeichens** klären, siehe **Zeichen**.
 - **Referenzen** sind Beispielinhalte. Die Firmennamen beginnen mit «Muster», die
   Sektion weist im Vorspann darauf hin.
 - **Impressum und Datenschutz** sind Entwürfe. Handelsregistereintrag, UID-Nummer
