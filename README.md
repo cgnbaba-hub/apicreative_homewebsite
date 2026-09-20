@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 811 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 1064 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 896 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 832 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 1085 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 918 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -38,6 +38,12 @@ Kontaktbereich schickte den Besucher wieder nach oben.
 Es gibt bewusst nur **zwei Formulare**: den Website-Check und das
 Newsletter-Pop-up. Der Newsletter-Streifen öffnet das Pop-up, statt ein
 eigenes Feld danebenzustellen.
+
+Im Website-Check sind **drei** Felder Pflicht: Name, E-Mail-Adresse und die
+Einwilligung. Mehr braucht es nicht, um zu antworten. Unternehmen,
+Website-Adresse und Anmerkungen sind freiwillig — wer sich meldet, hat nicht
+zwangsläufig eine Firma oder eine Website. Ein Satz über dem Absenden sagt das
+auch so.
 
 Referenzen ausblenden: `class="is-hidden"` an `<section id="referenzen">` ergänzen
 oder im Skript `SHOW_REFERENCES = false` setzen.
@@ -147,34 +153,71 @@ Jede Ansicht ist ein abgeschlossenes `<article>`. Für echte Unterseiten wird es
 später unverändert in eine eigene Datei gehoben; die Slugs sind schon die
 Adressen.
 
+## Bedienelemente ohne Skript
+
+Eine lokale Datei wird nicht überall in einem vollen Browser geöffnet — die
+Dateivorschau auf dem Telefon führt kein JavaScript aus. Dort standen zuerst
+Sprachumschalter, Menü und Pop-up still, während der Rest der Seite lief.
+
+Alle drei hängen jetzt an unsichtbaren Eingabefeldern ganz oben im Dokument,
+die CSS über `:has()` ausliest:
+
+| Feld | steuert |
+|---|---|
+| `#lang-de` / `#lang-en` | welche Sprachfassung sichtbar ist |
+| `#nav-auf` | das Menü auf schmalen Fenstern |
+| `#nl-auf` | das Newsletter-Pop-up |
+
+Die sichtbaren Knöpfe sind `<label>`-Elemente dazu. Läuft ein Skript, liest es
+dieselben Felder und setzt zusätzlich eine Klasse am `<html>` — für Browser,
+die `:has()` noch nicht können, und weil sich daran leichter weitere Regeln
+hängen. Beide Regelsätze stehen im Stylesheet **getrennt** und nicht als
+Liste: ein Browser ohne `:has()` würde sonst auch die Klassenregel daneben
+verwerfen.
+
+Die Felder stehen `position:fixed` am Fensterrand. Stünden sie im normalen
+Fluss am Dokumentanfang, holte der Browser sie beim Fokussieren ins Bild und
+die Seite spränge beim Umschalten nach oben.
+
+**Eine Einschränkung bleibt:** ohne Skript schliesst sich das Menü nicht von
+selbst, wenn man einen Punkt darin wählt. Die Seite springt zum Abschnitt, das
+Menü bleibt offen, bis man das Kreuz antippt. CSS kann ein Ankreuzfeld nicht
+von einem Verweis aus zurücksetzen.
+
 ## Sprachen
 
 Deutsch und Englisch sind gleichrangig. Englisch ist keine Übersetzung, sondern
 eigener Text in britischer Schreibung; `lang` steht entsprechend auf `en-GB`
 oder `de-CH`.
 
+**Beide Fassungen stehen im Dokument.** Jede übersetzte Stelle trägt zwei
+Kinder, sichtbar ist immer genau eines:
+
+```html
+<h2><span class="t" lang="de-CH">Klein, persönlich, verlässlich.</span>
+    <span class="t" lang="en-GB">Small, personal, reliable.</span></h2>
+```
+
+Vorher tauschte JavaScript den Text aus. Das funktionierte — aber eben nur mit
+JavaScript. Jetzt macht es CSS, und für die Sprache ist kein Skript mehr nötig.
+
+Was CSS nicht erreicht, bleibt beim Skript: Platzhalter in Formularfeldern
+(`data-en-placeholder`), Vorlesetexte (`data-en-aria`) und Bildbeschreibungen
+(`data-en-alt`). Ohne Skript bleiben diese drei deutsch; sichtbarer Fliesstext
+ist davon nicht betroffen.
+
 Die Startsprache kommt aus `navigator.language` (`de*` → Deutsch, sonst
-Englisch). Die Wahl liegt im `sessionStorage` und bleibt für die Sitzung.
-Umgeschaltet wird ohne Neuladen.
-
-Im Markup steht Deutsch, das Englische hängt daran:
-
-| Attribut | wofür |
-|---|---|
-| `data-en` | sichtbarer Text |
-| `data-en-placeholder` | Platzhalter in Formularfeldern |
-| `data-en-alt` | Bildbeschreibungen |
-| `data-en-aria` | Vorlesetexte |
-
-Was das Skript selbst ausgibt — Fehlermeldungen, die Beschriftung der Schiene —
-steht im Objekt `TEXTE` und wird über `T('schluessel')` geholt. Im Code steht
-keine sichtbare Zeichenkette mehr.
+Englisch), die Wahl liegt im `sessionStorage` und bleibt für die Sitzung.
 
 **Die Scrollposition** bleibt beim Umschalten erhalten, aber nicht als Zahl:
-Englisch braucht für denselben Inhalt andere Zeilenzahlen, die Seite über dem
-Sichtfenster wird also länger oder kürzer. Gemerkt wird deshalb, welcher
-Abschnitt gerade oben steht; nach dem Tausch wird er wieder an dieselbe Stelle
-gesetzt. `scrollY` ändert sich dabei um ein paar Pixel, der Blick nicht.
+Englisch braucht für denselben Inhalt andere Zeilenzahlen. Gemerkt wird
+deshalb, welcher Abschnitt gerade oben steht; nach dem Tausch wird er wieder
+an dieselbe Stelle gesetzt.
+
+**Der Zeilensatz der Überschriften** wird beim Wechsel zurückgebaut und neu
+gemessen — und ausserdem, sobald die Schrift geladen ist. Wird gegen die
+Ersatzschrift gemessen, bricht die Überschrift sonst anders um als nach einem
+Neuladen.
 
 Das **Intro bleibt deutsch**. Es ist ein Zeitstück, eine deutsche Website von
 1999; eine englische Fassung wäre eigene Textarbeit, kein Übersetzen.
