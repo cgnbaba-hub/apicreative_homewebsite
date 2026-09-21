@@ -6,132 +6,140 @@
 Das Band zwischen Referenzen und "Ueber uns" war ein Foto: ein Lichthof mit
 einer Person an der Bruestung. Die Vorlage hatte 1376 Pixel Breite und wurde
 ueber die volle Fensterbreite gezeigt - auf einem feinen Bildschirm sah man
-das. Hier steht stattdessen eine Zeichnung: dieselbe Szene, aber als Vektor,
-und damit in jeder Groesse scharf und ein paar Kilobyte gross.
+das.
 
-Aufbau in Ebenen, von hinten nach vorn. Ein Fluchtpunkt, zwei Kantenwinkel
-und eine Tonleiter aus sieben Werten - damit das Bild Tiefe bekommt und nicht
-als heller Brei zerfaellt. Die Person steht fuer den Massstab; ohne sie
-verliert der Raum seine Groesse.
+Hier steht stattdessen eine Zeichnung. Und zwar keine, bei der Flaechen ins
+Bild geschoben werden, sondern eine echte Zentralperspektive: Koerper werden
+im Raum beschrieben und projiziert. Dadurch fluchten alle Kanten von selbst
+auf denselben Punkt, die Fenstersprossen stehen im richtigen Abstand, und die
+Flaechen eines Koerpers bekommen ihren Ton aus ihrer Lage - oben hell, zur
+Fensterwand heller, unten dunkel.
+
+Die Person steht fuer den Massstab. Ohne sie verliert der Raum seine Groesse.
 
 Nach einer Aenderung erst dieses Skript laufen lassen, dann build.py.
 """
+import math
 import pathlib
 import re
 import sys
 
-B, H = 1600.0, 500.0
-VX, VY = 1010.0, 238.0
+B, H = 1600.0, 520.0
+F = 900.0                      # Brennweite
+CX, CY = 800.0, 252.0          # der Fluchtpunkt sitzt rechts der Mitte:
+                               # die helle Fensterwand bekommt mehr Bild
 
-# Warme Grautoene wie Travertin, von tief nach hell
-TON = ["#6E6558", "#8A8071", "#A2988A", "#BCB2A3", "#D3CABC", "#E7E1D6", "#F7F4EE"]
-TIEF, DUNKEL, MITTELD, MITTEL, HELL, HELLER, LICHT = TON
-FIGUR = "#4A443B"
+# Tonleiter, warmes Grau wie Travertin
+T = {
+  "himmel": "#F6F3EE", "glanz": "#FFFFFF",
+  "oben": "#E9E3D8", "front": "#D4CBBB", "seite": "#EFEAE1", "unten": "#9C9077",
+  "tief": "#7C7160", "wand": "#E3DCD0", "wand_fern": "#EDE8DF",
+  "glas": "#FAF9F6", "sprosse": "#C6BEB1", "boden": "#E7E1D6", "figur": "#4A443B",
+}
+
+
+def p(x, y, z):
+    """3D nach 2D. z ist die Tiefe, y zeigt nach unten."""
+    z = max(z, 0.35)
+    return (CX + F * x / z, CY + F * y / z)
+
+
+def flaeche(pkt3, farbe, o=None, teile=None):
+    d = " ".join("%.1f,%.1f" % p(*q) for q in pkt3)
+    teile.append('<polygon points="%s" fill="%s"%s/>' % (
+        d, farbe, ' opacity="%s"' % o if o else ""))
+
+
+def kante(a, b, farbe, w=1.0, o=None, teile=None):
+    x1, y1 = p(*a)
+    x2, y2 = p(*b)
+    teile.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" '
+                 'stroke-width="%.2f"%s stroke-linecap="round"/>'
+                 % (x1, y1, x2, y2, farbe, w, ' opacity="%s"' % o if o else ""))
+
+
+def quader(x0, x1, y0, y1, z0, z1, teile, ton_oben=None, ton_front=None,
+           ton_seite=None, ton_unten=None):
+    """Ein Koerper. Gezeichnet werden nur die Flaechen, die man von hier sieht."""
+    ton_oben = ton_oben or T["oben"]
+    ton_front = ton_front or T["front"]
+    ton_seite = ton_seite or T["seite"]
+    ton_unten = ton_unten or T["unten"]
+    if y0 > 0:                      # ueber Augenhoehe: Unterseite sichtbar
+        flaeche([(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], ton_unten, teile=teile)
+    if y1 < 0:                      # unter Augenhoehe: Oberseite sichtbar
+        flaeche([(x0, y1, z0), (x1, y1, z0), (x1, y1, z1), (x0, y1, z1)], ton_oben, teile=teile)
+    if x0 > 0:                      # rechts der Achse: linke Seite sichtbar
+        flaeche([(x0, y0, z0), (x0, y1, z0), (x0, y1, z1), (x0, y0, z1)], ton_seite, teile=teile)
+    if x1 < 0:
+        flaeche([(x1, y0, z0), (x1, y1, z0), (x1, y1, z1), (x1, y0, z1)], ton_seite, teile=teile)
+    flaeche([(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0)], ton_front, teile=teile)
+
 
 teile = []
-add = teile.append
+def F_(pkt, farbe, o=None): flaeche(pkt, farbe, o, teile)
+def K_(a, b, farbe, w=1.0, o=None): kante(a, b, farbe, w, o, teile)
+def Q_(*a, **k): quader(*a, teile=teile, **k)
 
-def poly(pkt, farbe, o=None):
-    add('<polygon points="%s" fill="%s"%s/>' % (
-        " ".join("%.1f,%.1f" % p for p in pkt), farbe,
-        ' opacity="%s"' % o if o else ""))
+# Ein Lichthof: hoch, schmal, Licht von links.
+DECKE, BODEN = -6.4, 2.3
+LINKS, RECHTS = -4.2, 4.6
+FERN = 26.0
 
-def linie(a, b, farbe, w=1.0, o=None):
-    add('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" stroke-width="%.2f"%s/>'
-        % (a[0], a[1], b[0], b[1], farbe, w, ' opacity="%s"' % o if o else ""))
+teile.append('<rect x="0" y="0" width="%g" height="%g" fill="%s"/>' % (B, H, T["wand"]))
 
-def vp(p, t):
-    return (p[0] + (VX - p[0]) * t, p[1] + (VY - p[1]) * t)
+# --- Rueckwand, heller als die Seiten: dorthin faellt das Licht -------------
+F_([(LINKS,DECKE,FERN),(RECHTS,DECKE,FERN),(RECHTS,BODEN,FERN),(LINKS,BODEN,FERN)], T["wand_fern"])
+for x, w, o in ((-3.4, 1.5, "0.80"), (-1.2, 0.9, "0.55"), (0.5, 0.5, "0.34")):
+    F_([(x,DECKE,FERN-0.01),(x+w,DECKE,FERN-0.01),(x+w+2.2,BODEN,FERN-0.01),(x+2.2,BODEN,FERN-0.01)],
+       T["glanz"], o)
 
-# ---------------------------------------------------------------- Grund
-add('<rect width="%g" height="%g" fill="%s"/>' % (B, H, HELL))
+# --- Decke, weit oben: sie schliesst das Bild nach hinten -------------------
+F_([(LINKS,DECKE,4.0),(RECHTS,DECKE,4.0),(RECHTS,DECKE,FERN),(LINKS,DECKE,FERN)], T["tief"], "0.55")
 
-# --------------------------------------------- Rueckwand aus Stein, hell
-poly([(300, 0), (1210, 0), (1210, H), (300, H)], HELLER)
+# --- Boden ------------------------------------------------------------------
+F_([(LINKS,BODEN,4.0),(RECHTS,BODEN,4.0),(RECHTS,BODEN,FERN),(LINKS,BODEN,FERN)], T["boden"])
+# Lichtfelder in der Rhythmik der Fensterachsen
+for z0, br in ((5.4, 2.6), (9.2, 2.2), (14.0, 1.8), (20.0, 1.4)):
+    F_([(LINKS,BODEN,z0),(LINKS+2.9,BODEN,z0+1.1),
+        (LINKS+3.3,BODEN,z0+br+1.1),(LINKS,BODEN,z0+br)], T["glanz"], "0.62")
 
-# ---------------------------------------- Lichtbahnen ueber der Steinwand
-# Erst das Licht, dann der Schatten daneben: so bekommt die Wand Richtung.
-for x, w, o in ((330, 185, "0.85"), (610, 120, "0.62"), (790, 70, "0.42")):
-    poly([(x, 0), (x + w, 0), (x + w + 300, H), (x + 300, H)], LICHT, o)
-for x, w, o in ((515, 70, "0.30"), (730, 46, "0.22")):
-    poly([(x, 0), (x + w, 0), (x + w + 300, H), (x + 300, H)], MITTELD, o)
+# --- Fensterwand links ------------------------------------------------------
+F_([(LINKS,DECKE,4.0),(LINKS,DECKE,FERN),(LINKS,BODEN,FERN),(LINKS,BODEN,4.0)], T["glas"])
+z = 4.6
+while z < FERN:
+    K_((LINKS,DECKE,z),(LINKS,BODEN,z), T["sprosse"], max(0.55, 14.0/z), "0.75")
+    z *= 1.175
+for y in (-4.3, -2.1, 0.1):
+    K_((LINKS,y,4.0),(LINKS,y,FERN), T["sprosse"], 1.1, "0.42")
 
-# ------------------------------------------------ Verglaste Wand links
-o_v, u_v = (-10.0, -10.0), (-10.0, H + 10)
-o_h, u_h = vp(o_v, 0.74), vp(u_v, 0.74)
-poly([o_v, o_h, u_h, u_v], LICHT)
-poly([o_v, o_h, u_h, u_v], HELLER, "0.35")
-for i in range(1, 13):
-    t = (1 - (1 - i / 13) ** 2.0) * 0.74
-    linie(vp(o_v, t), vp(u_v, t), MITTEL, 3.0 * (1 - t) + 0.6, "0.75")
-# angedeutete Nachbarhaeuser, sehr blass
-poly([(18, 232), (104, 232), (104, H), (18, H)], MITTEL, "0.16")
-poly([(126, 286), (196, 286), (196, H), (126, H)], MITTEL, "0.11")
-# Der Pfeiler, der die Verglasung begrenzt
-poly([(286, -10), (330, -10), (330, H + 10), (286, H + 10)], HELLER)
-poly([(322, -10), (330, -10), (330, H + 10), (322, H + 10)], MITTEL, "0.5")
+# --- Rechte Wand mit tiefen Einschnitten (Galerien) -------------------------
+F_([(RECHTS,DECKE,4.0),(RECHTS,DECKE,FERN),(RECHTS,BODEN,FERN),(RECHTS,BODEN,4.0)], T["front"])
+for yo, yu in ((-5.30,-4.86), (-3.85,-3.41), (-2.40,-1.96), (-0.95,-0.51), (0.50,0.94)):
+    Q_(3.70, RECHTS, yo, yu, 4.4, FERN-0.4)
+    K_((3.70,yo-0.80,4.4),(3.70,yo-0.80,FERN-0.4), T["sprosse"], 1.1, "0.4")
+    K_((3.70,yo-0.03,4.4),(3.70,yo-0.03,FERN-0.4), T["glanz"], 1.4, "0.85")
 
-# ----------------------------------------------- Galerien rechts, gestaffelt
-def galerie(y, hoehe, tiefe_schatten, ton):
-    a = (1210.0, y)
-    b = (B + 10, y - (y - VY) * 0.30)
-    c = (B + 10, b[1] + hoehe * 0.72)
-    d = (1210.0, y + hoehe)
-    poly([a, b, c, d], ton)                                    # Stirnseite
-    poly([d, c, (c[0], c[1] + tiefe_schatten * 0.72), (d[0], d[1] + tiefe_schatten)], DUNKEL, "0.55")
-    linie((a[0], a[1] - 34), (b[0], b[1] - 26), MITTEL, 1.8, "0.55")   # Glasbruestung
-    linie((a[0], a[1] - 2), (b[0], b[1] - 2), HELL, 2.2, "0.9")
+# --- Auskragende Platten ----------------------------------------------------
+Q_(LINKS, 1.5, -3.15, -2.78, 6.2, 7.9)         # nah, oben
+Q_(-0.6, RECHTS, -1.28, -0.94, 10.4, 11.9)     # mitte
+Q_(LINKS, 0.9, 0.55, 0.88, 15.6, 17.1)         # hinten, unten
+Q_(-2.4, 2.6, -4.55, -4.28, 19.5, 20.7)        # ganz hinten, duenn
 
-poly([(1210, -10), (B + 10, -10), (B + 10, H + 10), (1210, H + 10)], HELL)
-galerie(90, 74, 30, MITTEL)
-galerie(262, 50, 26, HELLER)
-galerie(418, 84, 36, MITTEL)
-# Die Kante, an der die Steinwand in die Galerien umbricht. Ohne sie stossen
-# zwei Flaechen ohne Koerper aneinander.
-poly([(1186, -10), (1214, -10), (1214, H + 10), (1186, H + 10)], MITTELD)
-poly([(1206, -10), (1214, -10), (1214, H + 10), (1206, H + 10)], DUNKEL, "0.4")
+# --- Ein schlanker Pfeiler, der die Tiefe misst -----------------------------
+Q_(-2.35, -2.05, DECKE, BODEN, 12.4, 12.7, ton_front=T["seite"], ton_seite=T["oben"])
 
-# ------------------------------------ Auskragende Platten, die den Raum queren
-def platte(x0, y0, x1, y1, dicke, unterseite, ton=HELLER):
-    poly([(x0, y0), (x1, y1), (x1, y1 + dicke), (x0, y0 + dicke)], ton)
-    poly([(x0, y0 + dicke), (x1, y1 + dicke),
-          (x1, y1 + dicke + unterseite * 0.8), (x0, y0 + dicke + unterseite)], MITTELD)
-    linie((x0, y0), (x1, y1), LICHT, 2.0, "0.8")               # Lichtkante oben
-
-# oben: eine schwere Decke, die das Bild oben schliesst
-poly([(300, -10), (1210, -10), (1210, 44), (300, 58)], MITTEL)
-poly([(300, 44), (1210, 44), (1210, 62), (300, 82)], DUNKEL, "0.45")
-
-platte(250, 120, 1010, 186, 34, 22, HELL)
-platte(180, 296, 960, 320, 30, 26, HELLER)
-platte(120, 430, 900, 408, 44, 30, HELL)
-
-# ------------------------------------------------------ Bruestung und Figur
-kante = 296.0
-linie((640, kante - 2), (930, kante + 8), MITTELD, 2.2, "0.85")
-linie((640, kante - 52), (930, kante - 42), MITTEL, 1.6, "0.55")
-for x in (640, 785, 930):
-    t = (x - 640) / 290
-    linie((x, kante - 52 + 10 * t), (x, kante - 2 + 10 * t), MITTEL, 1.2, "0.45")
-
-# Die Figur steht fuer den Massstab. Schlank, ohne Gesicht, ohne Geste.
-fx, fy = 700.0, kante - 1
-add('<g fill="%s">' % FIGUR)
-add('<circle cx="%.1f" cy="%.1f" r="4.6"/>' % (fx, fy - 58))
-poly([(fx - 4.8, fy - 52), (fx + 4.8, fy - 52), (fx + 6.2, fy - 22), (fx - 5.8, fy - 22)], FIGUR)
-poly([(fx - 5.4, fy - 23), (fx - 1.0, fy - 23), (fx - 1.2, fy), (fx - 4.6, fy)], FIGUR)
-poly([(fx + 1.2, fy - 23), (fx + 5.8, fy - 23), (fx + 5.2, fy), (fx + 1.6, fy)], FIGUR)
-add('</g>')
-poly([(fx - 7, fy), (fx + 7, fy), (fx + 14, fy + 6), (fx - 14, fy + 6)], DUNKEL, "0.22")
-
-# ------------------------------------------------------------------ Boden
-poly([(-10, 452), (1186, 452), (1186, H + 10), (-10, H + 10)], HELL)
-poly([(-10, 452), (1186, 452), (1186, 470), (-10, 462)], MITTEL, "0.45")
-poly([(60, H + 10), (330, 466), (620, 466), (520, H + 10)], LICHT, "0.7")
-poly([(560, H + 10), (640, 466), (740, 466), (700, H + 10)], LICHT, "0.45")
-
-SVG = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %g %g" '
-       'preserveAspectRatio="xMidYMid slice">%s</svg>' % (B, H, "".join(teile)))
+# --- Die Person, auf der mittleren Platte -----------------------------------
+fx, fz, FUSS = 4.15, 16.5, -0.95
+kopf = p(fx, FUSS - 1.60, fz); r = F * 0.072 / fz
+teile.append('<g fill="%s">' % T["figur"])
+teile.append('<circle cx="%.1f" cy="%.1f" r="%.1f"/>' % (kopf[0], kopf[1], r))
+F_([(fx-0.15,FUSS-1.50,fz),(fx+0.15,FUSS-1.50,fz),(fx+0.17,FUSS-0.82,fz),(fx-0.17,FUSS-0.82,fz)], T["figur"])
+F_([(fx-0.16,FUSS-0.84,fz),(fx-0.02,FUSS-0.84,fz),(fx-0.03,FUSS,fz),(fx-0.14,FUSS,fz)], T["figur"])
+F_([(fx+0.03,FUSS-0.84,fz),(fx+0.16,FUSS-0.84,fz),(fx+0.14,FUSS,fz),(fx+0.04,FUSS,fz)], T["figur"])
+teile.append('</g>')
+# Handlauf vor ihr
+K_((3.70,FUSS-0.92,16.5),(RECHTS,FUSS-0.92,16.5), T["sprosse"], 1.3, "0.55")
 
 MARKUP = ('<svg class="band-pic" viewBox="0 0 %g %g" '
           'preserveAspectRatio="xMidYMid slice" focusable="false">%s</svg>'

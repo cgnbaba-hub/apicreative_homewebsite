@@ -6,9 +6,9 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 832 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 1085 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 918 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 539 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `apicreative-praesentation.html` | 770 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `apicreative-ohne-intro.html` | 624 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
 Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
 doppelklicken, öffnet im Browser.
@@ -90,27 +90,55 @@ beigestellt hat. Die Vorlage trug ein Wasserzeichen. Ob die Lizenz die
 kommerzielle Nutzung deckt, ist vor der Veröffentlichung zu klären; die hier
 konstruierte Fassung ist eine Neuzeichnung, keine Kopie der Datei.
 
-## Bildband
+## Bilder
 
-Das Band zwischen Referenzen und «Über uns» war ein Foto: ein Lichthof mit
-einer Person an der Brüstung. Die Vorlage hatte 1376 Pixel Breite und wurde
-über die volle Fensterbreite gezeigt — auf einem feinen Bildschirm sah man das.
+Bis auf die beiden Porträts ist **kein Bild mehr ein Bild**. Alle Flächen sind
+gezeichnet: scharf in jeder Grösse, in jedem Fall wenige Kilobyte.
 
-Jetzt steht dort eine **Zeichnung derselben Szene als SVG**: 67 Flächen, rund
-6 KB, scharf in jeder Grösse. `make_band.py` erzeugt sie und schreibt sie in
-`index.html`.
+| Fläche | vorher | jetzt |
+|---|---|---|
+| Hero-Hintergrund | Render 1376×768 | axonometrisches Relieffeld, `make_grafik.py` |
+| Systembild Leistungen | Render 1376×768 | Netz aus Knoten und Kanten, `make_grafik.py` |
+| Bildband | Foto 1376×768 | Lichthof in Zentralperspektive, `make_band.py` |
+| Schwebende Körper | vier Ausschnitte eines Bildes | CSS-Verläufe, ohne Bilddaten |
+| Vorschau im Intro | Ausschnitt des Hero-Bildes | CSS-Verlauf |
+| Porträts | Fotos | Fotos — das bleiben sie |
 
-Aufbau in Ebenen, von hinten nach vorn, mit einem Fluchtpunkt, zwei
-Kantenwinkeln und einer Tonleiter aus sieben Werten. Die Person steht für den
-Massstab — ohne sie verliert der Raum seine Grösse.
+Das hat die Dateien um **rund 400 KB** leichter gemacht und das Thema
+Auflösung erledigt: Vektoren kennen keine zu kleine Vorlage.
+
+### Bildband
+
+Eine echte **Zentralperspektive**, keine geschobenen Flächen. Körper werden im
+Raum beschrieben und projiziert, deshalb fluchten alle Kanten von selbst auf
+denselben Punkt, die Fenstersprossen stehen im richtigen Abstand, und jede
+Fläche bekommt ihren Ton aus ihrer Lage: oben hell, zur Fensterwand heller,
+unten dunkel.
+
+Die erste Fassung war flach und blass, weil sie aus Parallelogrammen bestand
+statt aus Körpern. Man sah es, ohne sagen zu können, woran es liegt.
+
+Die Person steht für den Massstab. Ohne sie verliert der Raum seine Grösse.
+
+### Hero-Hintergrund
+
+Ein Feld aus niedrigen Körpern in Axonometrie — kein Gegenstand, sondern eine
+Fläche mit Relief. Die Höhen kommen aus einer glatten Funktion, nicht aus
+Zufall; deshalb wirkt das Feld geordnet und nicht gewürfelt. Nach links hin
+löst es sich auf, damit der Text freien Grund hat.
+
+### Systembild
+
+Ein Netz aus Knoten und Verbindungen, drei davon rot. Es zeigt, wovon der
+Abschnitt handelt — verbundene Systeme — und ist als Zeichnung präziser, als
+ein Renderbild es je war. Die Lage der Knoten kommt aus einer festen
+Zahlenfolge: zwei Läufe ergeben dasselbe Bild.
 
 ```
-python3 make_band.py
+python3 make_band.py      # das Bildband
+python3 make_grafik.py    # Hero und Systembild
 python3 build.py
 ```
-
-Das Foto `assets/bg-architektur.jpg` ist damit entfallen. Das spart rund
-200 KB in jeder der drei Dateien.
 
 ## Beitrag
 
@@ -393,12 +421,12 @@ Erfolgsmeldung, versenden aber nichts.
 
 Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
 
-- **Das Herobild** ist zu klein. Die Stitch-Vorlage ist nativ 1376×768; für
-  die Anzeigegrösse bräuchte es das Zwei- bis Dreifache. Die Technik dafür
-  steht (`<picture>` mit zwei Grössen, `width`, `height`, `loading`), es fehlt
-  das Bild. Siehe **Bilder**.
 - **Freigestelltes Teamfoto**: die Stelle in «Über uns» ist vorbereitet, aber
-  inaktiv. Im Markup steht `[Platzhalter: freigestelltes Teamfoto]`.
+  inaktiv. Gebraucht wird ein Bild von beiden, bei dem der Hintergrund
+  entfernt ist. Ein Versuch, stattdessen die vorhandenen Porträts
+  abgeschwächt in den Hintergrund zu legen, wurde verworfen: bei zehn Prozent
+  Deckkraft sieht man nichts, bei mehr steht ein Schleier hinter Karten, die
+  dieselben Gesichter schon scharf zeigen.
 - **Unterstützte Organisationen** im Abschnitt «Beitrag» sind noch offen;
   `[Platzhalter: unterstützte Organisationen]` steht sichtbar auf der Seite.
 - **Lizenz des Zeichens** klären, siehe **Zeichen**.
@@ -408,33 +436,16 @@ Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
   und vertretungsberechtigte Personen fehlen; beide Texte gehören juristisch geprüft.
   Ein Hinweis darauf steht sichtbar über den beiden Spalten.
 
-## Bilder
+## Porträts
 
-Alle inhaltlichen Bilder hängen an `<picture>` mit zwei Grössen, gesetzter
-`width` und `height` und `loading="lazy"` ausserhalb des ersten Bildschirms.
-Das Hero-Bild lädt mit `fetchpriority="high"` und ohne `lazy`. Nur die
-schwebenden Körper im Hintergrund bleiben eine CSS-Fläche: das Skript schneidet
-sie in vier Fenster, dafür braucht es ein Hintergrundbild.
+Die beiden Porträts sind die einzigen Fotos, die geblieben sind. Sie stammen
+aus Aufnahmen mit 704×1527 und 896×1195; der gemeinsame Ausschnitt gibt
+682×853 beziehungsweise 606×757 her. Mehr als 600×750 ist daraus nicht zu
+holen, ohne hochzuskalieren. Auf dem Telefon bei dreifacher Pixeldichte bleibt
+das knapp. Besser wird es nur mit neuen Aufnahmen.
 
-Gemessen im Browser, Anzeige in CSS-Pixeln:
-
-| Bild | nativ | angezeigt | nötig bei 2× | Urteil |
-|---|---|---|---|---|
-| `bg-geometrie` Hero | 1376×768 | bis 2054×865 | bis 4108 | **zu klein** |
-| Bildband | — | bis 1920×320 | — | als SVG gezeichnet, siehe **Bildband** |
-| `bg-netzwerk` Leistungen | 1376×768 | 403×224 | 806 | reicht |
-| `bg-objekte` Körper | 1376×768 | 471×421 | 942 | reicht |
-| `team-1`, `team-2` | 600×750 | 348×435 mobil | 1044 bei 3× | knapp |
-
-Alle Stitch-Vorlagen sind nativ 1376×768 — das ist die Decke, nicht der Export.
-Für den Hero braucht es ein Ersatzbild. Hochskalieren wurde verworfen: Faktor
-2,8 auf einer ohnehin weichen Vorlage wird nicht scharf, sondern glatt. Beim
-Bildband war der dritte Weg der bessere: nicht ersetzen, sondern zeichnen.
-
-Die Porträts stammen aus Aufnahmen mit 704×1527 und 896×1195; der gemeinsame
-Ausschnitt gibt 682×853 beziehungsweise 606×757 her. Mehr als 600×750 ist daraus
-nicht zu holen, ohne hochzuskalieren. Auf dem Telefon bei dreifacher Pixeldichte
-bleibt das knapp. Besser wird es nur mit neuen Aufnahmen.
+Eingebunden sind sie als `<picture>` mit zwei Grössen, gesetzter `width` und
+`height` und `loading="lazy"`.
 
 ## Ändern und neu erzeugen
 
