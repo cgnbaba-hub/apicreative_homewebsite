@@ -6,7 +6,7 @@ Website der Webagentur apicreative, Zürich.
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 539 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `index.html` | 517 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
 | `apicreative-praesentation.html` | 770 KB | ja | nein | Zum Verschicken und Vorführen. |
 | `apicreative-ohne-intro.html` | 624 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
 
