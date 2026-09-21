@@ -15,8 +15,6 @@ auf denselben Punkt, die Fenstersprossen stehen im richtigen Abstand, und die
 Flaechen eines Koerpers bekommen ihren Ton aus ihrer Lage - oben hell, zur
 Fensterwand heller, unten dunkel.
 
-Die Person steht fuer den Massstab. Ohne sie verliert der Raum seine Groesse.
-
 Nach einer Aenderung erst dieses Skript laufen lassen, dann build.py.
 """
 import math
@@ -129,17 +127,34 @@ Q_(-2.4, 2.6, -4.55, -4.28, 19.5, 20.7)        # ganz hinten, duenn
 # --- Ein schlanker Pfeiler, der die Tiefe misst -----------------------------
 Q_(-2.35, -2.05, DECKE, BODEN, 12.4, 12.7, ton_front=T["seite"], ton_seite=T["oben"])
 
-# --- Die Person, auf der mittleren Platte -----------------------------------
-fx, fz, FUSS = 4.15, 16.5, -0.95
-kopf = p(fx, FUSS - 1.60, fz); r = F * 0.072 / fz
-teile.append('<g fill="%s">' % T["figur"])
-teile.append('<circle cx="%.1f" cy="%.1f" r="%.1f"/>' % (kopf[0], kopf[1], r))
-F_([(fx-0.15,FUSS-1.50,fz),(fx+0.15,FUSS-1.50,fz),(fx+0.17,FUSS-0.82,fz),(fx-0.17,FUSS-0.82,fz)], T["figur"])
-F_([(fx-0.16,FUSS-0.84,fz),(fx-0.02,FUSS-0.84,fz),(fx-0.03,FUSS,fz),(fx-0.14,FUSS,fz)], T["figur"])
-F_([(fx+0.03,FUSS-0.84,fz),(fx+0.16,FUSS-0.84,fz),(fx+0.14,FUSS,fz),(fx+0.04,FUSS,fz)], T["figur"])
-teile.append('</g>')
-# Handlauf vor ihr
-K_((3.70,FUSS-0.92,16.5),(RECHTS,FUSS-0.92,16.5), T["sprosse"], 1.3, "0.55")
+# --- Die Person ------------------------------------------------------------
+# Draussen. Ein zweiter Anlauf mit Mantel, unsymmetrischer Haltung und
+# Schatten auf dem Boden hat es nicht besser gemacht: bei dieser Groesse
+# bleibt eine einzelne dunkle Gestalt ein Piktogramm, und ein Piktogramm in
+# einer sonst ruhigen Zeichnung faellt auf, nicht auf die gute Art. Der Raum
+# traegt seine Groesse auch ohne sie - ueber die Fensterachsen und die
+# Galerien, die sich nach hinten staffeln.
+#
+# Zurueckholen: PERSON auf True setzen.
+PERSON = False
+if PERSON:
+    fx, fz, FUSS = 4.02, 13.0, -0.95
+    KOPF = FUSS - 1.62
+    F_([(fx - 0.14, FUSS, fz - 0.05), (fx + 0.16, FUSS, fz - 0.05),
+        (fx + 0.62, FUSS, fz + 0.22), (fx + 0.30, FUSS, fz + 0.26)], T["unten"], "0.30")
+    teile.append('<g fill="%s">' % T["figur"])
+    kopf = p(fx, KOPF, fz)
+    teile.append('<circle cx="%.1f" cy="%.1f" r="%.1f"/>' % (kopf[0], kopf[1], F * 0.074 / fz))
+    F_([(fx - 0.19, KOPF + 0.16, fz), (fx + 0.17, KOPF + 0.19, fz),
+        (fx + 0.15, FUSS - 0.62, fz), (fx - 0.17, FUSS - 0.62, fz)], T["figur"])
+    F_([(fx - 0.14, FUSS - 0.64, fz), (fx - 0.03, FUSS - 0.64, fz),
+        (fx - 0.04, FUSS, fz), (fx - 0.13, FUSS, fz)], T["figur"])
+    F_([(fx + 0.02, FUSS - 0.64, fz), (fx + 0.13, FUSS - 0.64, fz),
+        (fx + 0.15, FUSS, fz), (fx + 0.06, FUSS, fz)], T["figur"])
+    teile.append('</g>')
+
+# Der Handlauf bleibt: er gehoert zur Architektur, nicht zur Staffage.
+K_((3.70, -1.47, 4.4), (3.70, -1.47, FERN - 0.4), T["sprosse"], 1.3, "0.55")
 
 MARKUP = ('<svg class="band-pic" viewBox="0 0 %g %g" '
           'preserveAspectRatio="xMidYMid slice" focusable="false">%s</svg>'

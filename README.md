@@ -118,7 +118,13 @@ unten dunkel.
 Die erste Fassung war flach und blass, weil sie aus Parallelogrammen bestand
 statt aus Körpern. Man sah es, ohne sagen zu können, woran es liegt.
 
-Die Person steht für den Massstab. Ohne sie verliert der Raum seine Grösse.
+**Ohne Person.** Sie stand erst an der Brüstung, für den Massstab. Ein zweiter
+Anlauf mit Mantel, unsymmetrischer Haltung und Schatten auf dem Boden hat es
+nicht besser gemacht: bei dieser Grösse bleibt eine einzelne dunkle Gestalt
+ein Piktogramm, und ein Piktogramm in einer sonst ruhigen Zeichnung fällt auf,
+nicht auf die gute Art. Der Raum trägt seine Grösse auch ohne sie — über die
+Fensterachsen und die Galerien, die sich nach hinten staffeln.
+Zurückholen: in `make_band.py` `PERSON = True` setzen.
 
 ### Hero-Hintergrund
 
@@ -181,6 +187,28 @@ Jede Ansicht ist ein abgeschlossenes `<article>`. Für echte Unterseiten wird es
 später unverändert in eine eigene Datei gehoben; die Slugs sind schon die
 Adressen.
 
+## Vorgehen: der Abschnitt bleibt stehen
+
+Beim Abschnitt «Vorgehen» hält die Seite kurz an, während man durch die drei
+Schritte wandert. Der jeweils aktive Schritt steht scharf, die anderen treten
+zurück, und ein Zähler sagt, wo man ist.
+
+Das Festhalten macht **`position:sticky`**, also CSS. Die Hülle
+(`.steps-scroll` mit 250vh, darin `.steps-sticky`) steht seit Neuestem im
+Markup statt im Skript — damit funktioniert es auch dort, wo kein Skript
+läuft. Vorher baute das Skript sie auf, und in einer Dateivorschau ohne
+JavaScript passierte gar nichts.
+
+Welcher Schritt an der Reihe ist, entscheidet mit Skript die Scrollposition,
+ohne Skript eine **scrollgesteuerte Animation**: die Hülle gibt eine benannte
+Zeitleiste aus, die drei Schritte greifen nacheinander darauf zu. Die
+Prozentwerte sind gerechnet, nicht geraten — sie stehen als Herleitung im
+Stylesheet.
+
+Auf flachen Fenstern (unter 680px Höhe) und bei reduzierter Bewegung bleibt
+das Festhalten aus: dort wäre der festgehaltene Inhalt höher als das Fenster
+und der dritte Schritt unerreichbar.
+
 ## Bedienelemente ohne Skript
 
 Eine lokale Datei wird nicht überall in einem vollen Browser geöffnet — die
@@ -207,7 +235,7 @@ Die Felder stehen `position:fixed` am Fensterrand. Stünden sie im normalen
 Fluss am Dokumentanfang, holte der Browser sie beim Fokussieren ins Bild und
 die Seite spränge beim Umschalten nach oben.
 
-**Eine Einschränkung bleibt:** ohne Skript schliesst sich das Menü nicht von
+**Zwei Einschränkungen bleiben.** Ohne Skript schliesst sich das Menü nicht von
 selbst, wenn man einen Punkt darin wählt. Die Seite springt zum Abschnitt, das
 Menü bleibt offen, bis man das Kreuz antippt. CSS kann ein Ankreuzfeld nicht
 von einem Verweis aus zurücksetzen.
