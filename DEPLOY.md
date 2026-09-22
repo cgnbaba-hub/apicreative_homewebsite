@@ -27,6 +27,22 @@ npx wrangler pages deploy ./public --project-name apicreative --branch main
 einen fremden Server zeigt, wenn ein Pfad absolut statt relativ ist, oder
 wenn eine Datei fehlt, auf die das Dokument verweist.
 
+## Der einfachste Weg: ZIP hochladen
+
+Ohne Kommandozeile, ohne Anmeldung per Wrangler. Aus `public/` ein ZIP
+machen — die Dateien müssen **direkt** im ZIP liegen, nicht in einem Ordner
+darin:
+
+```
+cd public && zip -r ../apicreative-website.zip . && cd ..
+```
+
+Dann im Cloudflare-Dashboard: **Workers & Pages → Create → Pages →
+Upload assets**, Projektname `apicreative`, ZIP hineinziehen, **Deploy site**.
+
+Für spätere Änderungen dasselbe Projekt öffnen → **Create new deployment** →
+neues ZIP hineinziehen. Die Adresse bleibt gleich, auch die verbundene Domain.
+
 ## Das erste Mal
 
 Einmalig, auf Ihrem eigenen Rechner:
