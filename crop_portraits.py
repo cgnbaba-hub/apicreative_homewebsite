@@ -30,9 +30,12 @@ except ImportError:
 
 ASSETS = pathlib.Path(__file__).parent / "assets"
 
+# Die Reihenfolge bestimmt, welches Bild auf welcher Karte landet:
+# die erste Zeile gehoert zur ersten Karte im Dokument (Peter, CEO),
+# die zweite zur zweiten (Jason, CTO). Die Dateinamen sagen es mit.
 SOURCES = [
-    ("portrait-1.jpg", "team-1.jpg"),
-    ("portrait-2.jpg", "team-2.jpg"),
+    ("portrait-peter.jpg", "team-1.jpg"),
+    ("portrait-jason.jpg", "team-2.jpg"),
 ]
 
 RATIO = 4 / 5        # Breite zu Hoehe
