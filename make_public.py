@@ -38,9 +38,19 @@ SKRIPTE = ["gsap.min.js", "ScrollTrigger.min.js", "lenis.min.js"]
 FONT_LINKS = build.FONT_LINKS
 CDN_SCRIPTS = build.CDN_SCRIPTS
 
-HEADERS = """# ===== VORSCHAU-SCHUTZ - BEIM ECHTEN LIVEGANG ENTFERNEN =====
-# Diese Datei haelt die Vorschau aus den Suchmaschinen. Beim Livegang
-# loeschen - und die Zeile <meta name="robots"> in index.html gleich mit.
+HEADERS = """# Die Seite selbst nie aus dem Zwischenspeicher ausliefern, ohne vorher
+# nachzufragen. Sonst zeigt ein Browser nach einer neuen Veroeffentlichung
+# noch tagelang die alte Fassung. Die Schriften in vendor/ duerfen dagegen
+# liegenbleiben, die aendern sich nie.
+/
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+
+# ===== VORSCHAU-SCHUTZ - BEIM ECHTEN LIVEGANG ENTFERNEN =====
+# Der folgende Block haelt die Vorschau aus den Suchmaschinen. Beim
+# Livegang loeschen - und die Zeile <meta name="robots"> in index.html
+# gleich mit.
 /*
   X-Robots-Tag: noindex
 """
