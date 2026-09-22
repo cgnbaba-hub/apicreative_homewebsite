@@ -1,0 +1,5 @@
+# ===== VORSCHAU-SCHUTZ - BEIM ECHTEN LIVEGANG ENTFERNEN =====
+# Diese Datei haelt die Vorschau aus den Suchmaschinen. Beim Livegang
+# loeschen - und die Zeile <meta name="robots"> in index.html gleich mit.
+/*
+  X-Robots-Tag: noindex

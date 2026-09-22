@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Erzeugt den Veroeffentlichungsordner public/.
+"""Erzeugt einen Veroeffentlichungsordner.
 
-    python3 make_public.py
+    python3 make_public.py                -> public/            (mit Intro)
+    python3 make_public.py --ohne-intro   -> public-ohne-intro/ (ohne Intro)
 
 Hinein kommt nur, was die Website im Browser braucht:
 
     index.html          die Seite, mit oertlichen statt fremden Adressen
-    vendor/*.js         GSAP, ScrollTrigger, Lenis
     vendor/*.woff2      die Schrift Inter, vier Schnitte
-    _headers            Vorschau-Schutz fuer Cloudflare Pages
+    vendor/*.js         GSAP, ScrollTrigger, Lenis - nur in der Fassung
+                        mit Intro; ohne Intro werden sie nicht gebraucht
+    _headers            Vorschau-Schutz
 
 Der Unterschied zur Quelle: index.html laedt Schrift und Bibliotheken von
 einem CDN. Auf der eigenen Adresse soll nichts von fremden Servern kommen -
@@ -25,20 +27,16 @@ import re
 import shutil
 import sys
 
+import build
+
 ROOT = pathlib.Path(__file__).parent
-ZIEL = ROOT / "public"
 VENDOR = ROOT / "vendor"
 
 SCHRIFTEN = [400, 500, 600, 700]
 SKRIPTE = ["gsap.min.js", "ScrollTrigger.min.js", "lenis.min.js"]
 
-FONT_LINKS = """<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">"""
-
-CDN_SCRIPTS = """<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" onerror="window.__gsapFailed=true"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" onerror="window.__gsapFailed=true"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js" onerror="window.__lenisFailed=true"></script>"""
+FONT_LINKS = build.FONT_LINKS
+CDN_SCRIPTS = build.CDN_SCRIPTS
 
 HEADERS = """# ===== VORSCHAU-SCHUTZ - BEIM ECHTEN LIVEGANG ENTFERNEN =====
 # Diese Datei haelt die Vorschau aus den Suchmaschinen. Beim Livegang
@@ -76,7 +74,7 @@ def skript_block():
         for name in SKRIPTE)
 
 
-def pruefen(text):
+def pruefen(text, ziel):
     """Nichts Fremdes mehr, und jeder oertliche Pfad existiert."""
     fremd = (re.findall(r'\bsrc\s*=\s*"(https?://[^"]+)"', text)
              + re.findall(r'<link[^>]*\bhref\s*=\s*"(https?://[^"]+)"', text)
@@ -93,44 +91,67 @@ def pruefen(text):
     for pfad in sorted(pfade):
         if pfad.startswith("/"):
             fail("absoluter Pfad, sollte relativ sein: " + pfad)
-        if not (ZIEL / pfad).exists():
+        if not (ziel / pfad).exists():
             fail("verweist auf eine Datei, die es nicht gibt: " + pfad)
     return sorted(pfade)
 
 
 def main():
+    ohne_intro = "--ohne-intro" in sys.argv[1:]
+    for arg in sys.argv[1:]:
+        if arg != "--ohne-intro":
+            fail("unbekannte Option: " + arg)
+
+    ziel = ROOT / ("public-ohne-intro" if ohne_intro else "public")
+
     quelle = ROOT / "index.html"
     if not quelle.exists():
         fail("index.html nicht gefunden")
-    if '<meta name="robots" content="noindex, nofollow">' not in quelle.read_text(encoding="utf-8"):
+    text = quelle.read_text(encoding="utf-8")
+    if '<meta name="robots" content="noindex, nofollow">' not in text:
         fail("der Vorschau-Schutz fehlt in index.html")
 
-    if ZIEL.exists():
-        shutil.rmtree(ZIEL)
-    (ZIEL / "vendor").mkdir(parents=True)
+    if ziel.exists():
+        shutil.rmtree(ziel)
+    (ziel / "vendor").mkdir(parents=True)
 
-    for name in SKRIPTE + ["inter-latin-%d-normal.woff2" % g for g in SCHRIFTEN]:
+    dateien = ["inter-latin-%d-normal.woff2" % g for g in SCHRIFTEN]
+    if not ohne_intro:
+        dateien += SKRIPTE
+    for name in dateien:
         pfad = VENDOR / name
         if not pfad.exists():
             fail("fehlt: " + str(pfad))
-        shutil.copy2(pfad, ZIEL / "vendor" / name)
+        shutil.copy2(pfad, ziel / "vendor" / name)
 
-    text = quelle.read_text(encoding="utf-8")
-    text = ersetzen(text, FONT_LINKS, schrift_block(), "Schrift-Links")
-    text = ersetzen(text, CDN_SCRIPTS, skript_block(), "CDN-Skripte")
-    (ZIEL / "index.html").write_text(text, encoding="utf-8")
-    (ZIEL / "_headers").write_text(HEADERS, encoding="utf-8")
+    if ohne_intro:
+        # Genau dieselbe Fassung wie apicreative-ohne-intro.html, nur mit
+        # der Schrift als eigene Datei statt als Data-URI.
+        text = build.build_without_intro(text, schrift_block())
+    else:
+        text = ersetzen(text, FONT_LINKS, schrift_block(), "Schrift-Links")
+        text = ersetzen(text, CDN_SCRIPTS, skript_block(), "CDN-Skripte")
 
-    pfade = pruefen(text)
-    print("public/ erzeugt - keine fremden Server, alle Pfade relativ und vorhanden")
+    (ziel / "index.html").write_text(text, encoding="utf-8")
+    (ziel / "_headers").write_text(HEADERS, encoding="utf-8")
+
+    pfade = pruefen(text, ziel)
+    for nr, block in enumerate(re.findall(r"<style>(.*?)</style>", text, re.S), 1):
+        if block.count("/*") != block.count("*/"):
+            fail("Style-Block %d hat einen offenen Kommentar" % nr)
+
+    print("%s/ erzeugt - keine fremden Server, alle Pfade relativ und vorhanden"
+          % ziel.name)
     print()
     gesamt = 0
-    for datei in sorted(ZIEL.rglob("*")):
+    anzahl = 0
+    for datei in sorted(ziel.rglob("*")):
         if datei.is_file():
             groesse = datei.stat().st_size
             gesamt += groesse
-            print("  %8.1f KB  %s" % (groesse / 1024, datei.relative_to(ZIEL)))
-    print("  %8.1f KB  gesamt, %d Dateien" % (gesamt / 1024, sum(1 for d in ZIEL.rglob('*') if d.is_file())))
+            anzahl += 1
+            print("  %8.1f KB  %s" % (groesse / 1024, datei.relative_to(ziel)))
+    print("  %8.1f KB  gesamt, %d Dateien" % (gesamt / 1024, anzahl))
     print()
     print("  oertliche Verweise im Dokument: " + ", ".join(pfade))
 

@@ -93,9 +93,15 @@ def build_presentation(src):
     return out
 
 
-def build_without_intro(src):
-    """Nur die moderne Seite: kein Intro, keine Animationsbibliotheken."""
-    out = replace_once(src, FONT_LINKS, embedded_fonts(), "Schrift-Links")
+def build_without_intro(src, schrift=None):
+    """Nur die moderne Seite: kein Intro, keine Animationsbibliotheken.
+
+    schrift: der Block, der die Schrift-Links ersetzt. Ohne Angabe wird die
+    Schrift als Data-URI eingebettet - das ist die Fassung fuer eine einzelne
+    Datei, die offline laufen muss. make_public.py reicht stattdessen einen
+    Block mit Verweisen auf vendor/*.woff2 herein.
+    """
+    out = replace_once(src, FONT_LINKS, schrift or embedded_fonts(), "Schrift-Links")
 
     # Die Kopfzeilen-Weiche, die das Intro überhaupt erst aktiviert.
     out = cut(out, "<script>\n  /* Vor dem ersten Paint", "<style>\n/* ===", "Intro-Weiche")
