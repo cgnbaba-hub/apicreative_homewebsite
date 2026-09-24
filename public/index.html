@@ -14,9 +14,13 @@
      ============================================================== -->
 <meta name="robots" content="noindex, nofollow">
 <!-- ===== ENDE VORSCHAU-SCHUTZ ===== -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Die Schrift kommt vom eigenen Server, nicht von einem fremden. -->
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(vendor/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(vendor/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(vendor/inter-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url(vendor/inter-latin-700-normal.woff2) format('woff2')}
+</style>
 <!-- Das Zeichen im Browser-Tab: dasselbe A wie im Schriftzug, als SVG
      scharf in jeder Groesse. Daneben zwei PNG fuer die Stellen, die kein
      SVG nehmen - 180x180 fuer den Homescreen von iOS, 512x512 fuer alles
@@ -2364,9 +2368,9 @@ html.has-intro.intro-reveal .site-header{transform:none}
 .stage.is-modern #brandWord{-webkit-text-fill-color:var(--ink); color:var(--ink)}
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" onerror="window.__gsapFailed=true"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" onerror="window.__gsapFailed=true"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js" onerror="window.__lenisFailed=true"></script>
+<script src="vendor/gsap.min.js" onerror="window.__gsapFailed=true"></script>
+<script src="vendor/ScrollTrigger.min.js" onerror="window.__gsapFailed=true"></script>
+<script src="vendor/lenis.min.js" onerror="window.__lenisFailed=true"></script>
 
 <script>
 (function () {

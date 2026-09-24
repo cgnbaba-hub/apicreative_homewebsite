@@ -1,2 +1,20 @@
 # Entpackte Stitch-Entwürfe (Quelle ist das ZIP im Repository)
 stitch_apicreative_website_evolution_journey/
+
+# Python
+__pycache__/
+*.pyc
+
+# Screenshots aus Testlaeufen
+undefined/
+screens/
+
+# Arbeitsdateien, die nicht ins Repository gehoeren
+*.zip
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db
+.wrangler/
+node_modules/
