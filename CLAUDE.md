@@ -206,24 +206,58 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
 - Domain `apicreative.ch`: DNS bei Cloudflare (Nameserver `decker` und
   `norah.ns.cloudflare.com`), Registrierung weiterhin bei GoDaddy. `.com`
   und `.net` gehören der Firma ebenfalls und sollen auf `.ch` zeigen.
-- Der einzige DNS-Eintrag aus der GoDaddy-Zeit, der bleiben musste, ist
-  `TXT _dmarc`. **Auf der Domain läuft kein E-Mail-Empfang** — deshalb war
-  der Umzug risikoarm. Sollte sich das ändern, vor jeder DNS-Änderung die
-  MX-Einträge sichern.
+- Der einzige DNS-Eintrag aus der GoDaddy-Zeit, der bei `.ch` bleiben
+  musste, ist `TXT _dmarc`. **Auf `apicreative.ch` läuft kein
+  E-Mail-Empfang** — deshalb war der Umzug risikoarm.
+- **Auf `apicreative.com` läuft dagegen das Postfach** `info@apicreative.com`:
+  Microsoft 365 über GoDaddy (`MX` → `apicreative-com.mail.protection.outlook.com`,
+  `autodiscover` → Outlook, SPF `include:secureserver.net -all`). Diese
+  Adresse steht auf der Website und ist die Rückfallebene der Formulare.
+  **Vor jeder DNS-Änderung an `.com` alle Einträge sichern** — ein
+  verlorener MX-Eintrag legt die Firmen-Mail still, ohne Fehlermeldung.
+- `apicreative.net` hat keine Mail.
+- **CRM-Anbindung.** `make_public.py` setzt vor `</body>` das Tracking-Skript
+  des CRM ein (Kennung in `CRM_KENNUNG`). Es zählt Seitenaufrufe und legt
+  aus jedem abgeschickten Formular einen Kontakt an. Es kommt **nur** in
+  `public/` und `public-ohne-intro/`, nie in die Offline-Fassungen.
+  `--debug` schaltet seine Konsolenmeldungen ein, nur zum Prüfen.
+  Anforderungen des CRM an Formulare: echtes `<form>`, jedes Feld mit
+  `name`, E-Mail als `type="email" name="email"`, Absenden über
+  `type="submit"`, und das `submit`-Ereignis darf nicht blockiert werden —
+  nur `preventDefault` ist erlaubt. Ungültige Eingaben und Bots hält
+  `stopImmediatePropagation` zurück.
+- **Formulare.** Ein verstecktes Feld `quelle` (`anfrage` / `newsletter`)
+  sagt dem CRM, woher ein Kontakt kommt. Ein unsichtbares Feld
+  `firmenseite` ist eine Falle für Bots. Lädt das CRM-Skript nicht
+  (Werbeblocker, offline), öffnet das Formular das E-Mail-Programm mit
+  vorausgefüllter Nachricht an `info@apicreative.com`.
 - `_headers` enthält zweierlei: `no-cache` für die Seite selbst, damit ein
   neues Deployment sofort sichtbar ist, und den Vorschau-Schutz.
 
 ## Noch offen
 
-- **Das Kontaktformular verschickt nichts.** Es prüft die Eingaben und zeigt
-  eine Bestätigung — der Besucher glaubt also, er habe Kontakt aufgenommen.
-  Das ist schlechter als kein Formular und muss vor dem Livegang gelöst
-  werden.
+- **Erster echter Formulartest im CRM** steht aus: In den CRM-Einstellungen
+  müssen „Form Analytics" und „Form Submissions" eingeschaltet sein. Danach
+  eine Testanfrage absenden und prüfen, ob der Kontakt mit dem Feld
+  `quelle` ankommt.
+- **Newsletter-Versand aus dem CRM** unter `@apicreative.com`: Der
+  SPF-Eintrag endet auf `-all` und kennt nur GoDaddy. Bevor das CRM in
+  diesem Namen Mails verschickt, braucht es eine eigene Absenderdomain im
+  CRM oder einen angepassten SPF-/DKIM-Eintrag — sonst landet der
+  Newsletter im Spam.
+- **`.com` und `.net` auf `.ch` weiterleiten.** Empfohlen: die
+  Weiterleitung bei GoDaddy („Forward only", nicht „masking"), weil sie
+  die Nameserver von `.com` und damit das Postfach nicht berührt.
 - **Vorschau-Schutz entfernen** beim Livegang, an zwei Stellen: die Zeile
   `<meta name="robots">` in `index.html` und der markierte Block in
   `make_public.py`, aus dem `_headers` entsteht.
 - **Auf dem Handy ist die Bildquelle knapp** — 360 px für 348 px Anzeige.
   Bis 648 px ginge ohne Hochrechnen.
+- **Datenschutzerklärung** nennt den CRM-Dienstleister nur als Kategorie
+  („Dienstleister für Kundenmanagement und Marketing", Bearbeitung auch in
+  den USA) — so bleibt der White-Label-Grundsatz gewahrt. Juristisch prüfen
+  lassen, ob das genügt und ob für Besucher aus der EU eine Einwilligung
+  nötig ist.
 - **Referenzen:** Musternamen oder ausblenden. Erfundene Firmennamen wurden
   vorgeschlagen und begründet abgeraten.
 - **Rechtstexte** (Impressum, Datenschutz) sind Entwürfe und brauchen eine

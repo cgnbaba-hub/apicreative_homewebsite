@@ -1619,6 +1619,8 @@ html.motion-soft [data-reveal].is-in{opacity:1}
           <p class="t-sm"><span class="t" lang="de-CH">Unverbindlich. Keine Verkaufsanrufe.</span><span class="t" lang="en-GB">No obligation. No sales calls.</span></p>
         </div>
         <form id="checkForm" novalidate>
+          <input type="hidden" name="quelle" value="anfrage">
+          <div class="vh" aria-hidden="true"><label>Firmenseite <input type="text" name="firmenseite" tabindex="-1" autocomplete="off"></label></div>
           <div class="stack">
             <fieldset style="border:0; padding:0; margin:0">
               <legend style="font-size:.8125rem; font-weight:600; padding:0 0 .75rem"><span class="t" lang="de-CH">Ihre wichtigste Herausforderung</span><span class="t" lang="en-GB">Your main challenge</span></legend>
@@ -1675,7 +1677,11 @@ html.motion-soft [data-reveal].is-in{opacity:1}
 
             <div class="success" id="checkSuccess" role="status">
               <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>
-              <span><span class="t" lang="de-CH">Vielen Dank. Wir haben Ihre Anfrage erhalten und melden uns bei Ihnen. (Prototyp: es wird nichts versendet.)</span><span class="t" lang="en-GB">Thank you. We have received your enquiry and will get back to you. (Prototype: nothing is sent.)</span></span>
+              <span><span class="t" lang="de-CH">Vielen Dank. Wir haben Ihre Anfrage erhalten und melden uns bei Ihnen.</span><span class="t" lang="en-GB">Thank you. We have received your enquiry and will get back to you.</span></span>
+            </div>
+            <div class="success" id="checkMail" role="status">
+              <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>
+              <span><span class="t" lang="de-CH">Ihr E-Mail-Programm öffnet sich mit Ihrer Anfrage. Bitte senden Sie die Nachricht dort ab.</span><span class="t" lang="en-GB">Your e-mail program will open with your enquiry. Please send the message from there.</span></span>
             </div>
           </div>
         </form>
@@ -1717,11 +1723,13 @@ html.motion-soft [data-reveal].is-in{opacity:1}
           <h4><span class="t" lang="de-CH">Verantwortliche Stelle</span><span class="t" lang="en-GB">Controller</span></h4>
           <p><span class="t" lang="de-CH">apicreative, Herostrasse 12, 8048 Zürich. Fragen zum Datenschutz richten Sie an info@apicreative.com.</span><span class="t" lang="en-GB">apicreative, Herostrasse 12, 8048 Zurich. Please address questions about data protection to info@apicreative.com.</span></p>
           <h4><span class="t" lang="de-CH">Welche Daten wir erheben</span><span class="t" lang="en-GB">What we collect</span></h4>
-          <p><span class="t" lang="de-CH">Wenn Sie ein Formular auf dieser Website ausfüllen, erheben wir die Angaben, die Sie eingeben: Name, Unternehmen, E-Mail-Adresse, Telefonnummer, Website-Adresse und Ihre Nachricht. Wir verwenden diese Angaben ausschliesslich, um Ihre Anfrage zu bearbeiten.</span><span class="t" lang="en-GB">When you fill in a form on this website we collect what you enter: name, company, e-mail address, telephone number, website address and your message. We use this information solely to handle your enquiry.</span></p>
+          <p><span class="t" lang="de-CH">Wenn Sie ein Formular auf dieser Website ausfüllen, erheben wir die Angaben, die Sie eingeben: Name, Unternehmen, E-Mail-Adresse, Website-Adresse und Ihre Nachricht. Wir verwenden diese Angaben ausschliesslich, um Ihre Anfrage zu bearbeiten.</span><span class="t" lang="en-GB">When you fill in a form on this website we collect what you enter: name, company, e-mail address, website address and your message. We use this information solely to handle your enquiry.</span></p>
           <h4><span class="t" lang="de-CH">Newsletter</span><span class="t" lang="en-GB">Newsletter</span></h4>
           <p><span class="t" lang="de-CH">Ihre E-Mail-Adresse verwenden wir nur für den Versand des Newsletters. Sie können sich jederzeit abmelden; ein Abmeldelink steht in jeder Ausgabe.</span><span class="t" lang="en-GB">We use your e-mail address only to send the newsletter. You can unsubscribe at any time; every issue contains an unsubscribe link.</span></p>
           <h4><span class="t" lang="de-CH">Weitergabe</span><span class="t" lang="en-GB">Disclosure</span></h4>
-          <p><span class="t" lang="de-CH">Wir geben Ihre Daten nicht an Dritte weiter, ausser wir sind gesetzlich dazu verpflichtet.</span><span class="t" lang="en-GB">We do not pass your data on to third parties unless we are required to by law.</span></p>
+          <p><span class="t" lang="de-CH">Für die Verwaltung von Anfragen und Kontakten und für die Auswertung der Besuche auf dieser Website setzen wir einen Dienstleister für Kundenmanagement und Marketing ein. Er bearbeitet die Daten in unserem Auftrag, auch in den USA. Darüber hinaus geben wir Ihre Daten nicht an Dritte weiter, ausser wir sind gesetzlich dazu verpflichtet.</span><span class="t" lang="en-GB">To manage enquiries and contacts and to evaluate visits to this website, we use a service provider for client management and marketing. It processes the data on our behalf, including in the USA. Beyond that, we do not pass your data on to third parties unless we are required to by law.</span></p>
+          <h4><span class="t" lang="de-CH">Auswertung der Besuche</span><span class="t" lang="en-GB">Website analytics</span></h4>
+          <p><span class="t" lang="de-CH">Beim Besuch dieser Website werden die aufgerufenen Seiten erfasst, und im Browser wird eine Kennung gespeichert. So lassen sich wiederholte Besuche und eine spätere Anfrage einander zuordnen. Sie können das verhindern, indem Sie Cookies und Skripte von Drittanbietern in Ihrem Browser sperren.</span><span class="t" lang="en-GB">When you visit this website, the pages you view are recorded and an identifier is stored in your browser. This allows repeat visits and a later enquiry to be linked. You can prevent this by blocking third-party cookies and scripts in your browser.</span></p>
           <h4><span class="t" lang="de-CH">Ihre Rechte</span><span class="t" lang="en-GB">Your rights</span></h4>
           <p><span class="t" lang="de-CH">Sie haben das Recht auf Auskunft über die zu Ihrer Person bearbeiteten Daten sowie auf Berichtigung oder Löschung. Wenden Sie sich dazu an die oben genannte Adresse.</span><span class="t" lang="en-GB">You have the right to information about the data processed about you and to have it corrected or deleted. Please contact us at the address above.</span></p>
           <h4><span class="t" lang="de-CH">Aufbewahrung</span><span class="t" lang="en-GB">Retention</span></h4>
@@ -1995,6 +2003,8 @@ html.motion-soft [data-reveal].is-in{opacity:1}
     <h2 id="modal-title"><span class="t" lang="de-CH">Einmal im Monat, kurz und konkret.</span><span class="t" lang="en-GB">Once a month, short and to the point.</span></h2>
     <p class="t-body" id="modal-desc"><span class="t" lang="de-CH">Ein Brief über Website, Kundenmanagement und Automatisierung. Kein Verkauf, und Ihre Adresse bleibt bei uns.</span><span class="t" lang="en-GB">A letter about websites, client management and automation. No selling, and your address stays with us.</span></p>
     <form id="modalForm" novalidate>
+          <input type="hidden" name="quelle" value="newsletter">
+          <div class="vh" aria-hidden="true"><label>Firmenseite <input type="text" name="firmenseite" tabindex="-1" autocomplete="off"></label></div>
       <div class="field">
         <label class="vh" for="m-mail">E-Mail-Adresse</label>
         <input id="m-mail" name="email" type="email" required placeholder="Ihre E-Mail-Adresse" data-en-placeholder="Your e-mail address">
@@ -2006,7 +2016,11 @@ html.motion-soft [data-reveal].is-in{opacity:1}
       </button>
       <div class="success" id="modalSuccess" role="status">
         <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>
-        <span><span class="t" lang="de-CH">Vielen Dank. Ihre Adresse ist notiert. (Prototyp: es wird nichts versendet.)</span><span class="t" lang="en-GB">Thank you. Your address has been noted. (Prototype: nothing is sent.)</span></span>
+        <span><span class="t" lang="de-CH">Vielen Dank. Ihre Anmeldung ist eingegangen.</span><span class="t" lang="en-GB">Thank you. Your sign-up has been received.</span></span>
+      </div>
+      <div class="success" id="modalMail" role="status">
+        <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>
+        <span><span class="t" lang="de-CH">Ihr E-Mail-Programm öffnet sich mit Ihrer Anmeldung. Bitte senden Sie die Nachricht dort ab.</span><span class="t" lang="en-GB">Your e-mail program will open with your sign-up. Please send the message from there.</span></span>
       </div>
       <label class="no-thanks" for="nl-auf" data-close><span class="t" lang="de-CH">Nein danke</span><span class="t" lang="en-GB">No thank you</span></label>
     </form>
@@ -2021,6 +2035,9 @@ html.motion-soft [data-reveal].is-in{opacity:1}
 
   /* Referenzen-Sektion: hier auf false setzen, um sie auszublenden. */
   var SHOW_REFERENCES = true;
+
+  /* Wohin Anfragen gehen, wenn das CRM-Skript nicht geladen ist. */
+  var ANFRAGE_MAIL = 'info@apicreative.com';
 
   var root  = document.documentElement;
   var $     = function (s, c) { return (c || document).querySelector(s); };
@@ -2068,14 +2085,22 @@ html.motion-soft [data-reveal].is-in{opacity:1}
       bestaetigen: 'Bitte bestätigen Sie diesen Punkt.',
       mail:        'Bitte prüfen Sie die E-Mail-Adresse.',
       adresse:     'Bitte geben Sie eine gültige Web-Adresse an.',
-      abschnitte:  'Abschnitte'
+      abschnitte:  'Abschnitte',
+      betreff_anfrage:    'Anfrage über apicreative.ch',
+      betreff_newsletter: 'Newsletter-Anmeldung',
+      feld_challenge: 'Anliegen', feld_name: 'Name', feld_firma: 'Unternehmen',
+      feld_url: 'Website', feld_email: 'E-Mail', feld_notes: 'Nachricht'
     },
     en: {
       pflicht:     'Please fill in this field.',
       bestaetigen: 'Please confirm this point.',
       mail:        'Please check the e-mail address.',
       adresse:     'Please enter a valid web address.',
-      abschnitte:  'Sections'
+      abschnitte:  'Sections',
+      betreff_anfrage:    'Enquiry via apicreative.ch',
+      betreff_newsletter: 'Newsletter sign-up',
+      feld_challenge: 'Topic', feld_name: 'Name', feld_firma: 'Company',
+      feld_url: 'Website', feld_email: 'E-mail', feld_notes: 'Message'
     }
   };
   var LANG = (function () {
@@ -2165,7 +2190,7 @@ html.motion-soft [data-reveal].is-in{opacity:1}
   })();
 
   /* ========================================================
-     C. Formulare (Prototyp: Validierung + Erfolgsmeldung)
+     C. Formulare
      ======================================================== */
   function showError(input, msg) {
     var slot = $('[data-err="' + input.id + '"]');
@@ -2175,16 +2200,72 @@ html.motion-soft [data-reveal].is-in{opacity:1}
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()); }
   function validUrl(v)   { return /^([a-z][a-z0-9+.-]*:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(v.trim()); }
 
-  function wireForm(formId, successId) {
-    var form = $('#' + formId); if (!form) return;
-    var success = $('#' + successId);
+  /* Die Eintraege nimmt das CRM-Skript entgegen, das make_public.py in die
+     veroeffentlichte Fassung setzt. Es hoert auf das submit-Ereignis und legt
+     aus den Feldern einen Kontakt an; das Ereignis darf deshalb nicht
+     blockiert werden, nur die Standardaktion. Laedt das Skript nicht -
+     offline, in der Dateivorschau, hinter einem Werbeblocker -, oeffnet das
+     Formular stattdessen das E-Mail-Programm mit vorausgefuellter Nachricht.
+     So geht keine Anfrage verloren. */
+  function crmBereit() { return window.__crmBereit === true; }
+
+  function sichtbarerText(el) {
+    if (!el) return '';
+    var t = el.querySelector('.t[lang="' + (LANG === 'en' ? 'en-GB' : 'de-CH') + '"]');
+    return (t || el).textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  function perMail(form) {
+    var zeilen = [];
     $$('input, textarea', form).forEach(function (el) {
+      if (el.type === 'hidden' || el.name === 'firmenseite' || el.name === 'privacy') return;
+      var wert = el.type === 'radio'
+        ? (el.checked ? sichtbarerText(el.closest('label')) : '')
+        : el.value.trim();
+      if (wert) zeilen.push((T('feld_' + el.name) || el.name) + ': ' + wert);
+    });
+    var quelle = $('[name="quelle"]', form);
+    var betreff = T(quelle && quelle.value === 'newsletter' ? 'betreff_newsletter' : 'betreff_anfrage');
+    window.location.href = 'mailto:' + ANFRAGE_MAIL
+      + '?subject=' + encodeURIComponent(betreff)
+      + '&body=' + encodeURIComponent(zeilen.join('\n'));
+  }
+
+  function wireForm(formId) {
+    var form = $('#' + formId); if (!form) return;
+    var vor = formId.replace(/Form$/, '');
+    var meldung = { ok: $('#' + vor + 'Success'), mail: $('#' + vor + 'Mail') };
+    var felder = $$('input, textarea', form).filter(function (el) {
+      return el.type !== 'hidden' && el.name !== 'firmenseite';
+    });
+    felder.forEach(function (el) {
       el.addEventListener('input', function () { showError(el, ''); });
     });
+
+    function zeigen(art) {
+      Object.keys(meldung).forEach(function (k) {
+        if (meldung[k]) meldung[k].setAttribute('data-on', k === art ? 'true' : 'false');
+      });
+      window.setTimeout(function () {
+        if (meldung[art]) meldung[art].setAttribute('data-on', 'false');
+      }, 9000);
+    }
+    function abschliessen(art) {
+      zeigen(art);
+      form.dispatchEvent(new CustomEvent('apic:gesendet'));
+      /* Erst leeren, wenn das CRM-Skript die Felder gelesen hat. Ob es das
+         im selben Moment tut oder einen Takt spaeter, sieht man von aussen
+         nicht; zwei Sekunden decken beides ab. */
+      window.setTimeout(function () {
+        form.reset();
+        felder.forEach(function (el) { showError(el, ''); });
+      }, 2000);
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var firstBad = null;
-      $$('input, textarea', form).forEach(function (el) {
+      felder.forEach(function (el) {
         if (el.type === 'radio') return;
         var msg = '';
         if (el.type === 'checkbox') {
@@ -2199,17 +2280,28 @@ html.motion-soft [data-reveal].is-in{opacity:1}
         showError(el, msg);
         if (msg && !firstBad) firstBad = el;
       });
-      if (firstBad) { firstBad.focus(); return; }
-      form.reset();
-      $$('input, textarea', form).forEach(function (el) { showError(el, ''); });
-      if (success) {
-        success.setAttribute('data-on', 'true');
-        window.setTimeout(function () { success.setAttribute('data-on', 'false'); }, 9000);
+      if (firstBad) {
+        /* Ungueltiges nicht an das CRM-Skript weiterreichen - es wuerde
+           sonst halbe Kontakte anlegen. */
+        e.stopImmediatePropagation();
+        firstBad.focus();
+        return;
       }
+      var falle = $('[name="firmenseite"]', form);
+      if (falle && falle.value) {
+        /* Das unsichtbare Feld fuellt nur eine Maschine aus. */
+        e.stopImmediatePropagation();
+        abschliessen('ok');
+        return;
+      }
+      if (crmBereit()) { abschliessen('ok'); return; }
+      e.stopImmediatePropagation();
+      perMail(form);
+      abschliessen('mail');
     });
   }
-  wireForm('checkForm', 'checkSuccess');
-  wireForm('modalForm', 'modalSuccess');
+  wireForm('checkForm');
+  wireForm('modalForm');
 
   /* ========================================================
      D. Newsletter-Pop-up
@@ -2267,7 +2359,7 @@ html.motion-soft [data-reveal].is-in{opacity:1}
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
-    $('#modalForm').addEventListener('submit', function () {
+    $('#modalForm').addEventListener('apic:gesendet', function () {
       window.setTimeout(closeModal, 2200);
     });
   }
