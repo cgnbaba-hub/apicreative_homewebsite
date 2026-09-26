@@ -130,6 +130,12 @@ die Ersatzschrift und sitzt hinterher falsch.
 
 ## Arbeitsweise, die sich bewährt hat
 
+**Pull Requests selbst mergen.** Der Auftraggeber hat das ausdrücklich
+übertragen: Änderungen gehen als Pull Request nach `main` und werden danach
+direkt gemerged, sobald sie geprüft sind. Einen schon gemergten Pull Request
+nie weiterverwenden — neue Commits auf den aktuellen `main` setzen und einen
+neuen öffnen.
+
 **Messen statt annehmen.** Jede Behauptung über das Ergebnis wurde geprüft:
 Kontrastwerte gerechnet, Bildgrössen im Browser ausgelesen, Anfragen
 mitgezählt, Scrollpositionen abgefragt, Deckkraft gemessen. Ein Fehler —
