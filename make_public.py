@@ -4,6 +4,9 @@
     python3 make_public.py                -> public/            (mit Intro)
     python3 make_public.py --ohne-intro   -> public-ohne-intro/ (ohne Intro)
 
+    --debug   schreibt die Meldungen des CRM-Skripts in die Browser-Konsole.
+              Nur zum Pruefen, nicht fuer den Dauerbetrieb.
+
 Hinein kommt nur, was die Website im Browser braucht:
 
     index.html          die Seite, mit oertlichen statt fremden Adressen
@@ -11,6 +14,10 @@ Hinein kommt nur, was die Website im Browser braucht:
     vendor/*.js         GSAP, ScrollTrigger, Lenis - nur in der Fassung
                         mit Intro; ohne Intro werden sie nicht gebraucht
     _headers            Vorschau-Schutz
+    CRM-Skript          vor </body>: zaehlt Seitenaufrufe und nimmt die
+                        Formulare entgegen. Nur hier, nicht in den
+                        Offline-Fassungen aus build.py - die sollen nichts
+                        nach aussen senden.
 
 Der Unterschied zur Quelle: index.html laedt Schrift und Bibliotheken von
 einem CDN. Auf der eigenen Adresse soll nichts von fremden Servern kommen -
@@ -34,6 +41,11 @@ VENDOR = ROOT / "vendor"
 
 SCHRIFTEN = [400, 500, 600, 700]
 SKRIPTE = ["gsap.min.js", "ScrollTrigger.min.js", "lenis.min.js"]
+
+# Das einzige fremde Skript, das die veroeffentlichte Seite laden darf.
+# Die Kennung ist nicht geheim, sie steht ohnehin im Quelltext der Seite.
+CRM_SKRIPT = "https://link.msgsndr.com/js/external-tracking.js"
+CRM_KENNUNG = "tk_837138338a0042cca8f9be3095785390"
 
 FONT_LINKS = build.FONT_LINKS
 CDN_SCRIPTS = build.CDN_SCRIPTS
@@ -84,11 +96,20 @@ def skript_block():
         for name in SKRIPTE)
 
 
+def crm_block(debug):
+    return ('<!-- CRM-Anbindung: Seitenaufrufe und Formulareingaben. Die beiden\n'
+            '     Merker sagen den Formularen, ob sie hierueber senden koennen. -->\n'
+            '<script src="%s" data-tracking-id="%s"%s '
+            'onload="window.__crmBereit=true" onerror="window.__crmFehlt=true"></script>\n'
+            % (CRM_SKRIPT, CRM_KENNUNG, ' data-debug="true"' if debug else ''))
+
+
 def pruefen(text, ziel):
-    """Nichts Fremdes mehr, und jeder oertliche Pfad existiert."""
+    """Nichts Fremdes ausser dem CRM-Skript, und jeder oertliche Pfad existiert."""
     fremd = (re.findall(r'\bsrc\s*=\s*"(https?://[^"]+)"', text)
              + re.findall(r'<link[^>]*\bhref\s*=\s*"(https?://[^"]+)"', text)
              + re.findall(r'url\(\s*["\']?(https?://[^"\')]+)', text))
+    fremd = [f for f in fremd if f != CRM_SKRIPT]
     if fremd:
         fail("laedt noch von fremden Servern: " + ", ".join(sorted(set(fremd))))
 
@@ -108,8 +129,9 @@ def pruefen(text, ziel):
 
 def main():
     ohne_intro = "--ohne-intro" in sys.argv[1:]
+    debug = "--debug" in sys.argv[1:]
     for arg in sys.argv[1:]:
-        if arg != "--ohne-intro":
+        if arg not in ("--ohne-intro", "--debug"):
             fail("unbekannte Option: " + arg)
 
     ziel = ROOT / ("public-ohne-intro" if ohne_intro else "public")
@@ -142,6 +164,7 @@ def main():
         text = ersetzen(text, FONT_LINKS, schrift_block(), "Schrift-Links")
         text = ersetzen(text, CDN_SCRIPTS, skript_block(), "CDN-Skripte")
 
+    text = ersetzen(text, "</body>", crm_block(debug) + "</body>", "Ende des Dokuments")
     (ziel / "index.html").write_text(text, encoding="utf-8")
     (ziel / "_headers").write_text(HEADERS, encoding="utf-8")
 
@@ -150,8 +173,8 @@ def main():
         if block.count("/*") != block.count("*/"):
             fail("Style-Block %d hat einen offenen Kommentar" % nr)
 
-    print("%s/ erzeugt - keine fremden Server, alle Pfade relativ und vorhanden"
-          % ziel.name)
+    print("%s/ erzeugt - ausser dem CRM-Skript keine fremden Server, alle Pfade "
+          "relativ und vorhanden%s" % (ziel.name, " - DEBUG AN" if debug else ""))
     print()
     gesamt = 0
     anzahl = 0
