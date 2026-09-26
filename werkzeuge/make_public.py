@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Erzeugt einen Veroeffentlichungsordner.
 
-    python3 make_public.py                -> public/            (mit Intro)
-    python3 make_public.py --ohne-intro   -> public-ohne-intro/ (ohne Intro)
+    python3 werkzeuge/make_public.py                -> ausgabe/public/            (mit Intro)
+    python3 werkzeuge/make_public.py --ohne-intro   -> ausgabe/public-ohne-intro/ (ohne Intro)
 
     --debug   schreibt die Meldungen des CRM-Skripts in die Browser-Konsole.
               Nur zum Pruefen, nicht fuer den Dauerbetrieb.
@@ -36,7 +36,8 @@ import sys
 
 import build
 
-ROOT = pathlib.Path(__file__).parent
+# Die Werkzeuge liegen in werkzeuge/, die Quelle eine Ebene hoeher.
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 VENDOR = ROOT / "vendor"
 
 SCHRIFTEN = [400, 500, 600, 700]
@@ -134,7 +135,7 @@ def main():
         if arg not in ("--ohne-intro", "--debug"):
             fail("unbekannte Option: " + arg)
 
-    ziel = ROOT / ("public-ohne-intro" if ohne_intro else "public")
+    ziel = ROOT / "ausgabe" / ("public-ohne-intro" if ohne_intro else "public")
 
     quelle = ROOT / "index.html"
     if not quelle.exists():
@@ -173,7 +174,7 @@ def main():
         if block.count("/*") != block.count("*/"):
             fail("Style-Block %d hat einen offenen Kommentar" % nr)
 
-    print("%s/ erzeugt - ausser dem CRM-Skript keine fremden Server, alle Pfade "
+    print("ausgabe/%s/ erzeugt - ausser dem CRM-Skript keine fremden Server, alle Pfade "
           "relativ und vorhanden%s" % (ziel.name, " - DEBUG AN" if debug else ""))
     print()
     gesamt = 0

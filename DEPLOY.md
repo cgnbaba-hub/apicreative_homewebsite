@@ -1,104 +1,73 @@
 # Veröffentlichen
 
-Die Website liegt fertig im Ordner **`public/`**. Nur dieser Ordner geht online.
+Live auf **apicreative.ch** läuft der Ordner **`ausgabe/public-ohne-intro/`** —
+die Seite ohne Scroll-Intro.
 
 ```
-public/
-  index.html                 die Seite
-  _headers                   Vorschau-Schutz (beim Livegang löschen)
-  vendor/*.js                GSAP, ScrollTrigger, Lenis
+ausgabe/public-ohne-intro/
+  index.html                 die Seite, mit CRM-Skript
+  _headers                   Zwischenspeicher-Regel und Vorschau-Schutz
   vendor/*.woff2             die Schrift Inter, vier Schnitte
 ```
 
-`public/` wird **erzeugt**, nicht von Hand gepflegt. Quelle ist `index.html`
-im Hauptordner.
+Der Ordner wird **erzeugt**, nicht von Hand gepflegt. Quelle ist `index.html`.
+Daneben liegt `ausgabe/public/`, dieselbe Seite mit Intro; sie ist derzeit nicht
+veröffentlicht.
+
+## Wie es eingerichtet ist
+
+- **Cloudflare**, als *Worker mit statischen Dateien* namens `apicreative`
+  (Workers & Pages). Statische Abrufe werden nicht abgerechnet.
+- Testadresse: `apicreative.cgnbaba.workers.dev`.
+- **Eigene Domains** am Worker: `apicreative.ch` und `www.apicreative.ch`.
+- Das **DNS von `apicreative.ch`** führt Cloudflare (Nameserver `decker` und
+  `norah.ns.cloudflare.com`). Registriert ist die Domain weiterhin bei GoDaddy.
+- **`apicreative.com` und `apicreative.net`** bleiben bei GoDaddy und sollen dort
+  per Weiterleitung auf `apicreative.ch` zeigen. **Die Nameserver von `.com` nicht
+  ändern:** Dort läuft das Postfach `business@apicreative.com` (Microsoft 365).
+
+Nicht angefasst werden der bestehende Tunnel im Cloudflare-Konto und alle anderen
+Projekte darin.
 
 ## Nach jeder Änderung
 
-Drei Befehle, immer in dieser Reihenfolge:
+Aus der Wurzel des Repositorys:
 
 ```
-python3 build.py         # die beiden Einzeldateien zum Verschicken
-python3 make_public.py   # den Veröffentlichungsordner neu bauen
-npx wrangler pages deploy ./public --project-name apicreative --branch main
+python3 werkzeuge/build.py                       # die beiden Offline-Dateien
+python3 werkzeuge/make_public.py --ohne-intro    # den Live-Ordner neu bauen
 ```
 
-`make_public.py` bricht ab, wenn etwas nicht stimmt: wenn eine Adresse auf
-einen fremden Server zeigt, wenn ein Pfad absolut statt relativ ist, oder
-wenn eine Datei fehlt, auf die das Dokument verweist.
+`make_public.py` bricht ab, wenn etwas nicht stimmt: wenn eine Adresse auf einen
+fremden Server zeigt (ausser dem CRM-Skript), wenn ein Pfad absolut statt relativ
+ist, oder wenn eine Datei fehlt, auf die das Dokument verweist.
 
-## Der einfachste Weg: ZIP hochladen
-
-Ohne Kommandozeile, ohne Anmeldung per Wrangler. Aus `public/` ein ZIP
-machen — die Dateien müssen **direkt** im ZIP liegen, nicht in einem Ordner
-darin:
+Dann den Ordner als ZIP packen. Die Dateien müssen **direkt** im ZIP liegen,
+nicht in einem Unterordner darin:
 
 ```
-cd public && zip -r ../apicreative-website.zip . && cd ..
+cd ausgabe/public-ohne-intro && zip -r ../../apicreative-JJJJ-MM-TT-stichwort.zip . && cd ../..
 ```
 
-Dann im Cloudflare-Dashboard: **Workers & Pages → Create → Pages →
-Upload assets**, Projektname `apicreative`, ZIP hineinziehen, **Deploy site**.
+Den Namen immer mit Datum und Stichwort versehen. Mehrere ZIPs mit demselben
+Namen führen dazu, dass eine alte Fassung hochgeladen wird.
 
-Für spätere Änderungen dasselbe Projekt öffnen → **Create new deployment** →
-neues ZIP hineinziehen. Die Adresse bleibt gleich, auch die verbundene Domain.
+Hochladen: im Cloudflare-Dashboard den Worker `apicreative` öffnen →
+**New deployment** → ZIP hineinziehen. Adresse und Domains bleiben gleich. Weil
+`_headers` die Seite nicht zwischenspeichern lässt, ist die neue Fassung sofort
+sichtbar; im Zweifel in einem privaten Fenster prüfen.
 
-## Das erste Mal
-
-Einmalig, auf Ihrem eigenen Rechner:
-
-```
-npx wrangler login
-```
-
-Es öffnet sich ein Browserfenster, dort bestätigen. Danach:
-
-```
-npx wrangler pages project create apicreative --production-branch main
-npx wrangler pages deploy ./public --project-name apicreative --branch main
-```
-
-Wrangler nennt Ihnen am Ende die Adresse, etwa
-`https://apicreative.pages.dev`.
-
-Haben Sie mehrere Cloudflare-Konten, fragt Wrangler, welches gemeint ist.
-Sie können es auch fest vorgeben:
-
-```
-export CLOUDFLARE_ACCOUNT_ID=<Konto-Kennung aus dem Dashboard>
-```
-
-## Der andere Weg: ohne Kommandozeile
-
-Weil `public/` im Repository liegt, geht es auch ganz ohne Wrangler:
-
-1. Cloudflare-Dashboard → **Workers & Pages** → **Create** → **Pages** →
-   **Connect to Git**
-2. Repository `cgnbaba-hub/apicreative_homewebsite` wählen
-3. **Build command** leer lassen, **Build output directory** auf `public`
-4. Production branch auf den gewünschten Zweig setzen
-
-Danach veröffentlicht jeder Push automatisch. `build.py` und
-`make_public.py` müssen Sie dann trotzdem vor dem Push laufen lassen, damit
-`public/` aktuell ist.
+Eine automatische Veröffentlichung bei jedem Push nach GitHub ist nicht
+eingerichtet.
 
 ## Beim echten Livegang
 
-Der Vorschau-Schutz muss an **zwei** Stellen weg, sonst bleibt die Seite für
-Suchmaschinen unsichtbar:
+Der Vorschau-Schutz hält die Seite aus den Suchmaschinen. Er muss an **zwei**
+Stellen weg:
 
 1. in `index.html` die markierte Zeile
    `<meta name="robots" content="noindex, nofollow">` samt Kommentarblock
-2. die Datei `public/_headers` — und den Block `HEADERS` in
-   `make_public.py`, sonst schreibt das Skript sie wieder hin
+2. in `werkzeuge/make_public.py` den markierten Teil von `HEADERS`, aus dem
+   `_headers` entsteht — die Zwischenspeicher-Regel darüber bleibt
 
-Danach `python3 make_public.py` und neu veröffentlichen.
-
-## Eigene Domain
-
-Im Cloudflare-Dashboard unter dem Pages-Projekt → **Custom domains**. Die
-DNS-Einträge bei GoDaddy machen Sie selbst.
-
-**Nicht angefasst wird dabei:** der bestehende Tunnel, bestehende
-DNS-Einträge und alle anderen Projekte im Konto. Die Befehle oben sprechen
-ausschliesslich das Pages-Projekt `apicreative` an.
+Danach neu bauen und hochladen wie oben.

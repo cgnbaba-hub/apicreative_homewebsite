@@ -2,16 +2,39 @@
 
 Website der Webagentur apicreative, Zürich.
 
-## Dateien
+## Ordner
+
+```
+index.html          Die Quelle. Alles andere wird daraus erzeugt.
+README.md           Diese Datei: wie die Seite gebaut ist.
+CLAUDE.md           Arbeitsanleitung: Regeln, Fallen, offene Punkte.
+DEPLOY.md           Wie die Seite ins Netz kommt.
+
+werkzeuge/          Die Skripte, die Grafiken zeichnen, Fotos zuschneiden
+                    und die ausgelieferten Fassungen bauen. Dazu
+                    diagnose.html zum Prüfen eines Geräts.
+assets/             Die beiden Porträtfotos, Original und Zuschnitt.
+  archiv/           Frühere Fotos und Hintergründe. Nichts benutzt sie
+                    mehr; sie bleiben zum Nachschlagen.
+vendor/             Schrift und Bibliotheken, damit nichts von fremden
+                    Servern geladen werden muss.
+ausgabe/            Alles Erzeugte. Nie von Hand ändern.
+entwuerfe/          Die ursprünglichen Gestaltungsentwürfe als ZIP.
+```
+
+Wer nur die Seite ansehen oder weitergeben will, braucht ausschliesslich
+`ausgabe/`:
 
 | Datei | Grösse | Intro | Internet nötig | Wofür |
 |---|---|---|---|---|
-| `index.html` | 517 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
-| `apicreative-praesentation.html` | 770 KB | ja | nein | Zum Verschicken und Vorführen. |
-| `apicreative-ohne-intro.html` | 624 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `index.html` | 529 KB | ja | ja | Quelle. Bibliotheken und Schrift per CDN. |
+| `ausgabe/apicreative-praesentation.html` | 782 KB | ja | nein | Zum Verschicken und Vorführen. |
+| `ausgabe/apicreative-ohne-intro.html` | 636 KB | nein | nein | Nur die moderne Seite, ohne Intro. |
+| `ausgabe/public-ohne-intro/` | 620 KB | nein | ja | **Das, was live auf apicreative.ch läuft.** |
+| `ausgabe/public/` | 772 KB | ja | ja | Dieselbe Fassung mit Intro, für den Webserver. |
 
-Alle drei sind einzelne HTML-Dateien ohne Server und ohne Installation: herunterladen,
-doppelklicken, öffnet im Browser.
+Die drei HTML-Dateien sind einzelne Dateien ohne Server und ohne Installation:
+herunterladen, doppelklicken, öffnet im Browser.
 
 **`index.html`** ist die Arbeitsfassung. Sie lädt GSAP, ScrollTrigger, Lenis und die
 Schrift Inter von einem CDN. Ohne Internet überspringt sie das Intro und zeigt sofort
@@ -22,6 +45,12 @@ einziger Netzwerkabruf, das Intro läuft auch ohne Verbindung.
 
 **`apicreative-ohne-intro.html`** zeigt nur die moderne Seite. Kein Scroll-Intro, keine
 Animationsbibliotheken.
+
+**`ausgabe/public/` und `ausgabe/public-ohne-intro/`** sind die Ordner für den Webserver: Schrift und
+Bibliotheken liegen dort als eigene Dateien, und das Tracking-Skript des CRM ist
+eingesetzt, das Seitenaufrufe zählt und die Formulare entgegennimmt. Die beiden
+Offline-Dateien enthalten es bewusst nicht. Wie ein Ordner veröffentlicht wird,
+steht in `DEPLOY.md`.
 
 ## Aufbau der Seite
 
@@ -81,8 +110,8 @@ das 180×180-PNG für den Homescreen von iOS und das 512×512-PNG für alles
 übrige. Der Tab kann damit nie ein anderes Zeichen zeigen als die Seite.
 
 ```
-python3 make_icons.py     # konstruiert das Zeichen, schreibt alle vier Fassungen
-python3 build.py          # erzeugt die beiden abgeleiteten Dateien
+python3 werkzeuge/make_icons.py     # konstruiert das Zeichen, schreibt alle vier Fassungen
+python3 werkzeuge/build.py          # erzeugt die beiden abgeleiteten Dateien
 ```
 
 **Herkunft:** Die Form geht auf einen Entwurf zurück, den der Auftraggeber
@@ -141,9 +170,9 @@ ein Renderbild es je war. Die Lage der Knoten kommt aus einer festen
 Zahlenfolge: zwei Läufe ergeben dasselbe Bild.
 
 ```
-python3 make_band.py      # das Bildband
-python3 make_grafik.py    # Hero und Systembild
-python3 build.py
+python3 werkzeuge/make_band.py      # das Bildband
+python3 werkzeuge/make_grafik.py    # Hero und Systembild
+python3 werkzeuge/build.py
 ```
 
 ## Beitrag
@@ -379,7 +408,7 @@ auf solchen Geräten völlig still. Die pauschale Regel setzte zudem jede
 Übergangsdauer auf `.001ms`; sie begrenzt jetzt auf `.2s`, damit
 Deckkraft-Übergänge überleben.
 
-`diagnose.html` prüft auf einem Gerät, was zugelassen ist: reduzierte Bewegung,
+`werkzeuge/diagnose.html` prüft auf einem Gerät, was zugelassen ist: reduzierte Bewegung,
 Zeigergerät, IntersectionObserver, `position:sticky`, `backdrop-filter`,
 JavaScript-Fehler, dazu vier sichtbare Testfelder. Bleibt die Tabelle leer und
 wächst nur Testfeld 4, führt die Umgebung kein JavaScript aus.
@@ -444,19 +473,17 @@ durch ist. Danach greifen Hover-Regeln wieder auf ihrer natürlichen Stufe.
 
 ## Was noch offen ist
 
-Es ist ein Prototyp ohne Backend. Die Formulare prüfen die Eingaben und zeigen eine
-Erfolgsmeldung, versenden aber nichts.
+Die gepflegte Liste steht in `CLAUDE.md` unter **Noch offen**. Die wichtigsten
+Punkte:
 
-Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
-
+- **Formulare im CRM testen.** Die Formulare sind angeschlossen, der erste
+  Probelauf mit dem echten CRM steht aus.
 - **Freigestelltes Teamfoto**: die Stelle in «Über uns» ist vorbereitet, aber
   inaktiv. Gebraucht wird ein Bild von beiden, bei dem der Hintergrund
   entfernt ist. Ein Versuch, stattdessen die vorhandenen Porträts
   abgeschwächt in den Hintergrund zu legen, wurde verworfen: bei zehn Prozent
   Deckkraft sieht man nichts, bei mehr steht ein Schleier hinter Karten, die
   dieselben Gesichter schon scharf zeigen.
-- **Unterstützte Organisationen** im Abschnitt «Beitrag» sind noch offen;
-  `[Platzhalter: unterstützte Organisationen]` steht sichtbar auf der Seite.
 - **Lizenz des Zeichens** klären, siehe **Zeichen**.
 - **Referenzen** sind Beispielinhalte. Die Firmennamen beginnen mit «Muster», die
   Sektion weist im Vorspann darauf hin.
@@ -466,47 +493,53 @@ Vor einer Veröffentlichung zu ersetzen oder zu prüfen:
 
 ## Porträts
 
-Die beiden Porträts sind die einzigen Fotos, die geblieben sind. Sie stammen
-aus Aufnahmen mit 704×1527 und 896×1195; der gemeinsame Ausschnitt gibt
-682×853 beziehungsweise 606×757 her. Mehr als 600×750 ist daraus nicht zu
-holen, ohne hochzuskalieren. Auf dem Telefon bei dreifacher Pixeldichte bleibt
-das knapp. Besser wird es nur mit neuen Aufnahmen.
+Die beiden Porträts sind die einzigen Fotos, die geblieben sind. Beide
+Aufnahmen haben 896×1195 Pixel; der gemeinsame Ausschnitt gibt rund 645×805
+her. Ausgeliefert werden 600×750 für den Desktop und 360×450 fürs Telefon.
+Mehr ist ohne Hochrechnen nicht zu holen.
 
-Eingebunden sind sie als `<picture>` mit zwei Grössen, gesetzter `width` und
-`height` und `loading="lazy"`.
+Die Originale heissen nach den Personen, `assets/portrait-peter.jpg` und
+`assets/portrait-jason.jpg`, damit die Zuordnung nicht aus einer Reihenfolge
+erraten werden muss. Eingebunden sind sie als `<picture>` mit zwei Grössen,
+gesetzter `width` und `height` und `loading="lazy"`.
 
 ## Ändern und neu erzeugen
 
-`index.html` ist die einzige Quelle. Die beiden anderen Dateien werden daraus erzeugt:
+`index.html` ist die einzige Quelle. Alles in `ausgabe/` wird daraus erzeugt. Die
+Werkzeuge lassen sich aus jedem Verzeichnis aufrufen; hier aus der Wurzel des
+Repositorys:
 
 ```
-python3 build.py
+python3 werkzeuge/make_icons.py      # Zeichen, Favicon, Touch-Icons  -> index.html
+python3 werkzeuge/make_band.py       # Bildband                       -> index.html
+python3 werkzeuge/make_grafik.py     # Hero und Systembild            -> index.html
+python3 werkzeuge/crop_portraits.py  # Porträts zuschneiden           -> index.html
+
+python3 werkzeuge/build.py                       # die beiden Offline-Dateien
+python3 werkzeuge/make_public.py                 # ausgabe/public/
+python3 werkzeuge/make_public.py --ohne-intro    # ausgabe/public-ohne-intro/
 ```
 
-Nach jeder Änderung an `index.html` ausführen, sonst laufen die Dateien auseinander.
-Das Skript prüft zum Schluss, dass die erzeugten Dateien nichts mehr extern nachladen.
+Die ersten vier braucht es nur, wenn sich an Zeichen, Grafiken oder Fotos etwas
+ändert. Die letzten drei nach **jeder** Änderung an `index.html`, sonst laufen die
+Fassungen auseinander. Beide Bau-Skripte prüfen zum Schluss, dass nichts von
+fremden Servern nachgeladen wird — mit der einen gewollten Ausnahme des
+CRM-Skripts in den Webserver-Ordnern.
 
 `vendor/` enthält die eingebetteten Fremdbestandteile: GSAP 3.12.5 mit ScrollTrigger,
 Lenis 1.1.20 und die Schrift Inter 5.3.0 (Zeichensatz Latein, Schnitte 400 bis 700).
 
-`assets/` enthält die beiden Teamfotos im Original und den daraus erzeugten
-Ausschnitt sowie drei Hintergründe: `bg-geometrie.jpg` (Hero, gespiegelt, damit
-der Text links freien Grund hat), `bg-objekte.jpg` (die schwebenden Objekte)
-und `bg-netzwerk.jpg` (Abschnittskopf der Leistungen). Das Bildband ist kein
-Foto mehr, sondern gezeichnet — siehe **Bildband**.
+`assets/` enthält die beiden Porträts im Original und die daraus erzeugten
+Ausschnitte `team-1.jpg` (Peter) und `team-2.jpg` (Jason). `crop_portraits.py`
+schneidet sie auf dasselbe Hochformat 4:5 zu, mit gleicher Kopfgrösse und gleicher
+Kinnhöhe, und bettet sie in `index.html` ein.
 
-`crop_portraits.py` schneidet die beiden Porträts auf dasselbe Hochformat 4:5
-zu, mit gleicher Kopfgrösse und gleicher Kinnhöhe:
-
-```
-python3 crop_portraits.py
-```
-
-Die Ausschnitte liegen anschliessend als `assets/team-1.jpg` und `assets/team-2.jpg`
-und sind in `index.html` als Datenkanal eingebettet.
+`assets/archiv/` bewahrt, was nicht mehr gebraucht wird: die ersten beiden
+Porträtaufnahmen und drei gerenderte Hintergründe, die durch gezeichnete Flächen
+ersetzt wurden — siehe **Bilder**.
 
 ## Entwürfe
 
-`stitch_apicreative_website_evolution_journey.zip` enthält die vier Stitch-Entwürfe
-und die DESIGN.md, aus denen die Seite entstanden ist. Der entpackte Ordner ist per
-`.gitignore` ausgenommen.
+`entwuerfe/` enthält die ursprünglichen Gestaltungsentwürfe und die DESIGN.md, aus
+denen die Seite entstanden ist, in zwei Fassungen als ZIP. Entpackte Ordner darin
+sind per `.gitignore` ausgenommen.

@@ -1,5 +1,5 @@
-# Entpackte Stitch-Entwürfe (Quelle ist das ZIP im Repository)
-stitch_apicreative_website_evolution_journey/
+# Entpackte Entwürfe (Quelle ist das ZIP in entwuerfe/)
+entwuerfe/*/
 
 # Python
 __pycache__/

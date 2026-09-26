@@ -35,6 +35,15 @@ und jede Codezeile. Sie sind mehrfach bestätigt worden.
 
 ## Aufbau
 
+```
+index.html      Quelle          werkzeuge/   Skripte, diagnose.html
+README.md       Bauweise        assets/      Porträts; archiv/ = unbenutzt
+CLAUDE.md       diese Datei     vendor/      Schrift, Bibliotheken
+DEPLOY.md       Veröffentlichen ausgabe/     alles Erzeugte
+                                entwuerfe/   ursprüngliche Entwürfe (ZIP)
+```
+
+
 `index.html` ist die **einzige Quelle**. Alles andere wird daraus erzeugt.
 Nie eine abgeleitete Datei von Hand ändern — sie wird beim nächsten Lauf
 überschrieben.
@@ -42,15 +51,17 @@ Nie eine abgeleitete Datei von Hand ändern — sie wird beim nächsten Lauf
 ```
 index.html                     Quelle. Mit Intro, Bibliotheken per CDN.
   │
-  ├─ build.py                  → apicreative-praesentation.html  (offline, mit Intro)
-  │                            → apicreative-ohne-intro.html     (offline, ohne Intro)
+  ├─ werkzeuge/build.py        → ausgabe/apicreative-praesentation.html  (offline, mit Intro)
+  │                            → ausgabe/apicreative-ohne-intro.html     (offline, ohne Intro)
   │
-  └─ make_public.py            → public/            (mit Intro, für den Webserver)
-     make_public.py --ohne-intro → public-ohne-intro/ (ohne Intro)
+  └─ werkzeuge/make_public.py  → ausgabe/public/            (mit Intro, Webserver)
+     … --ohne-intro            → ausgabe/public-ohne-intro/ (ohne Intro, LIVE)
 ```
 
-Die Grafiken sind nicht fotografiert, sondern gerechnet. Jedes Skript
-schreibt sein Ergebnis direkt in `index.html`:
+Die Grafiken sind nicht fotografiert, sondern gerechnet. Jedes Skript in
+`werkzeuge/` schreibt sein Ergebnis direkt in `index.html`. Alle Werkzeuge
+beziehen ihre Pfade auf die Wurzel des Repositorys und laufen aus jedem
+Verzeichnis:
 
 | Skript | erzeugt |
 |---|---|
@@ -207,7 +218,7 @@ Die Seite läuft als **Cloudflare Worker mit statischen Dateien** — das ist
 Cloudflares aktueller Weg, Pages ist die ältere Schiene. Statische Abrufe
 werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
 
-- Veröffentlicht wird der Inhalt von `public-ohne-intro/` als ZIP, Dateien
+- Veröffentlicht wird der Inhalt von `ausgabe/public-ohne-intro/` als ZIP, Dateien
   in der Wurzel, nicht in einem Unterordner.
 - Domain `apicreative.ch`: DNS bei Cloudflare (Nameserver `decker` und
   `norah.ns.cloudflare.com`), Registrierung weiterhin bei GoDaddy. `.com`
@@ -225,7 +236,7 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
 - **CRM-Anbindung.** `make_public.py` setzt vor `</body>` das Tracking-Skript
   des CRM ein (Kennung in `CRM_KENNUNG`). Es zählt Seitenaufrufe und legt
   aus jedem abgeschickten Formular einen Kontakt an. Es kommt **nur** in
-  `public/` und `public-ohne-intro/`, nie in die Offline-Fassungen.
+  `ausgabe/public/` und `ausgabe/public-ohne-intro/`, nie in die Offline-Fassungen.
   `--debug` schaltet seine Konsolenmeldungen ein, nur zum Prüfen.
   Anforderungen des CRM an Formulare: echtes `<form>`, jedes Feld mit
   `name`, E-Mail als `type="email" name="email"`, Absenden über
@@ -256,7 +267,7 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
   die Nameserver von `.com` und damit das Postfach nicht berührt.
 - **Vorschau-Schutz entfernen** beim Livegang, an zwei Stellen: die Zeile
   `<meta name="robots">` in `index.html` und der markierte Block in
-  `make_public.py`, aus dem `_headers` entsteht.
+  `werkzeuge/make_public.py`, aus dem `_headers` entsteht.
 - **Auf dem Handy ist die Bildquelle knapp** — 360 px für 348 px Anzeige.
   Bis 648 px ginge ohne Hochrechnen.
 - **Datenschutzerklärung** nennt den CRM-Dienstleister nur als Kategorie
