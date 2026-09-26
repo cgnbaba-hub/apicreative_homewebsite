@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Erzeugt die beiden abgeleiteten Fassungen aus index.html.
 
-    python3 build.py
+    python3 werkzeuge/build.py
 
 index.html ist die einzige Quelle. Nach jeder Änderung daran dieses Skript
 erneut ausführen, sonst laufen die Dateien auseinander.
 
-    index.html                      Quelle. Mit Intro, Bibliotheken per CDN.
-    apicreative-praesentation.html  Mit Intro. Alles eingebettet, läuft offline.
-    apicreative-ohne-intro.html     Ohne Intro. Nur die moderne Seite, ohne
+    index.html                              Quelle. Mit Intro, Bibliotheken per CDN.
+    ausgabe/apicreative-praesentation.html  Mit Intro. Alles eingebettet, läuft offline.
+    ausgabe/apicreative-ohne-intro.html     Ohne Intro. Nur die moderne Seite, ohne
                                     Animationsbibliotheken.
 
 Die Dateien in vendor/ stammen aus den npm-Paketen gsap@3.12.5,
@@ -20,7 +20,8 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).parent
+# Die Werkzeuge liegen in werkzeuge/, die Quelle eine Ebene hoeher.
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 VENDOR = ROOT / "vendor"
 
 # Blöcke in index.html, die hier ersetzt oder entfernt werden.
@@ -162,7 +163,8 @@ def main():
                           ("apicreative-ohne-intro.html", build_without_intro)):
         out = builder(src)
         check(name, out)
-        (ROOT / name).write_text(out, encoding="utf-8")
+        (ROOT / "ausgabe").mkdir(exist_ok=True)
+        (ROOT / "ausgabe" / name).write_text(out, encoding="utf-8")
     print("fertig")
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Zeichnet das Bildband und schreibt es in index.html.
 
-    python3 make_band.py
+    python3 werkzeuge/make_band.py
 
 Das Band zwischen Referenzen und "Ueber uns" war ein Foto: ein Lichthof mit
 einer Person an der Bruestung. Die Vorlage hatte 1376 Pixel Breite und wurde
@@ -162,7 +162,8 @@ MARKUP = ('<svg class="band-pic" viewBox="0 0 %g %g" '
 
 
 def main():
-    quelle = pathlib.Path(__file__).parent / "index.html"
+    # Das Werkzeug liegt in werkzeuge/, die Quelle eine Ebene hoeher.
+    quelle = pathlib.Path(__file__).resolve().parent.parent / "index.html"
     if not quelle.exists():
         sys.exit("make_band.py: index.html nicht gefunden")
     text = quelle.read_text(encoding="utf-8")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Schneidet die Teamfotos auf einen einheitlichen Ausschnitt zu.
 
-    python3 crop_portraits.py
+    python3 werkzeuge/crop_portraits.py
 
 Beide Bilder bekommen dasselbe Hochformat 4:5, dieselbe relative Kopfgroesse
 und dieselbe Kinnhoehe, damit die Karten nebeneinander ruhig wirken.
@@ -28,7 +28,9 @@ try:
 except ImportError:
     sys.exit("crop_portraits.py: benoetigt Pillow und numpy (pip install Pillow numpy)")
 
-ASSETS = pathlib.Path(__file__).parent / "assets"
+# Das Werkzeug liegt in werkzeuge/, Bilder und Quelle eine Ebene hoeher.
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+ASSETS = ROOT / "assets"
 
 # Die Reihenfolge bestimmt, welches Bild auf welcher Karte landet:
 # die erste Zeile gehoert zur ersten Karte im Dokument (Peter, CEO),
@@ -45,7 +47,7 @@ OUT_SIZE = (600, 750)
 OUT_SMALL = (360, 450)
 
 
-ROOT_HTML = pathlib.Path(__file__).parent / "index.html"
+ROOT_HTML = ROOT / "index.html"
 html = ROOT_HTML.read_text(encoding="utf-8") if ROOT_HTML.exists() else ""
 
 

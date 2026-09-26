@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Konstruiert das Zeichen und schreibt es in index.html.
 
-    python3 make_icons.py
+    python3 werkzeuge/make_icons.py
 
 Das Zeichen wird nicht gezeichnet, sondern gerechnet. Es folgt aus drei
 Zahlen (RAND, BAND, SPITZE_INNEN) und hat deshalb Eigenschaften, die man
@@ -36,7 +36,8 @@ try:
 except ImportError:
     sys.exit("make_icons.py: benötigt Pillow (pip install Pillow)")
 
-ROOT = pathlib.Path(__file__).parent
+# Die Werkzeuge liegen in werkzeuge/, die Quelle eine Ebene hoeher.
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 SEITE = 64.0          # Zeichenfläche
 RAND = 7.0            # Abstand zu allen vier Kanten

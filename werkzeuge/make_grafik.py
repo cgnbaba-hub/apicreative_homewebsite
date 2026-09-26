@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Zeichnet die beiden uebrigen Bildflaechen und schreibt sie in index.html.
 
-    python3 make_grafik.py
+    python3 werkzeuge/make_grafik.py
 
 Hero-Hintergrund und das Systembild bei den Leistungen waren Renderbilder mit
 1376 Pixel Breite. Ueber die volle Fensterbreite gezogen war das zu wenig.
@@ -25,7 +25,8 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).parent
+# Die Werkzeuge liegen in werkzeuge/, die Quelle eine Ebene hoeher.
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 # --------------------------------------------------------------- Werkzeug
