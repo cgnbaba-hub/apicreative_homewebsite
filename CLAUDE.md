@@ -209,7 +209,7 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
 - Der einzige DNS-Eintrag aus der GoDaddy-Zeit, der bei `.ch` bleiben
   musste, ist `TXT _dmarc`. **Auf `apicreative.ch` läuft kein
   E-Mail-Empfang** — deshalb war der Umzug risikoarm.
-- **Auf `apicreative.com` läuft dagegen das Postfach** `info@apicreative.com`:
+- **Auf `apicreative.com` läuft dagegen das Postfach** `business@apicreative.com`:
   Microsoft 365 über GoDaddy (`MX` → `apicreative-com.mail.protection.outlook.com`,
   `autodiscover` → Outlook, SPF `include:secureserver.net -all`). Diese
   Adresse steht auf der Website und ist die Rückfallebene der Formulare.
@@ -230,7 +230,7 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
   sagt dem CRM, woher ein Kontakt kommt. Ein unsichtbares Feld
   `firmenseite` ist eine Falle für Bots. Lädt das CRM-Skript nicht
   (Werbeblocker, offline), öffnet das Formular das E-Mail-Programm mit
-  vorausgefüllter Nachricht an `info@apicreative.com`.
+  vorausgefüllter Nachricht an `business@apicreative.com`.
 - `_headers` enthält zweierlei: `no-cache` für die Seite selbst, damit ein
   neues Deployment sofort sichtbar ist, und den Vorschau-Schutz.
 
@@ -258,6 +258,9 @@ werden nicht abgerechnet; für diese Website fallen keine Hostingkosten an.
   den USA) — so bleibt der White-Label-Grundsatz gewahrt. Juristisch prüfen
   lassen, ob das genügt und ob für Besucher aus der EU eine Einwilligung
   nötig ist.
+- **Bei 320 px Breite ist die Seite 384 px breit** und scrollt seitlich.
+  Ursache ist eine der gezeichneten Grafiken (`<polygon>` ragt heraus).
+  Ab 390 px, also bei allen aktuellen iPhones, tritt es nicht auf.
 - **Referenzen:** Musternamen oder ausblenden. Erfundene Firmennamen wurden
   vorgeschlagen und begründet abgeraten.
 - **Rechtstexte** (Impressum, Datenschutz) sind Entwürfe und brauchen eine
